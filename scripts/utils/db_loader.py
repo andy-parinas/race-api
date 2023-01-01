@@ -13,9 +13,22 @@ def load_db(file):
     for race in races:
         start_time = parser.get_race_start_time(race)
         date_time = f"{meeting_date} {start_time}"
-        race_db = repo.race.create(db, {"race_id": race['id'], "race_date": datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")})
+        race_db = repo.race.create(
+            db,
+            {
+                "race_id": race['id'],
+                "race_date": datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")
+            }
+        )
         horses = parser.get_race_horses(race)
         for horse in horses:
+            horse_db = repo.horse.create(
+                db,
+                {
+                    "horse_id":  horse['id'],
+                    "horse_name": horse['name']
+                }
+            )
             statistics = parser.get_horse_stats(horse)
             for stat in statistics:
-                print(f"{race['id']} {horse['name']} Stat Type: {stat['type']}")
+                print(f"{race_db.id}")
