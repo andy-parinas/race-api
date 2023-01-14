@@ -4,6 +4,8 @@ from app import repositories as repo
 from .xml_parser import XmlParser
 
 from app.schemas.meeting import MeetingCreate
+from app.schemas.current_race import CurrentRaceCreate
+
 
 
 def load_db(file):
@@ -48,17 +50,22 @@ def load_db(file):
             statistics = parser.get_horse_stats(horse)
             for stat in statistics:
                 if stat['type'] in allowed_stat:
+
+                    total = int(stat['total'])
+                    first = int(stat['firsts'])
+                    second = int(stat['seconds'])
+                    third = int(stat['thirds'])
+
                     current_race = repo.current_race.create(
-                            db,
-                            {
-                                "stat": stat['type'],
-                                "total": int(stat['total']),
-                                "first": int(stat['firsts']),
-                                "second": int(stat['seconds']),
-                                "third": int(stat['thirds']),
-                                "horse_id": horse_db.id,
-                                "race_id": race_db.id,
-                                "meeting_id": meeting.id
-                            }
+                            db, CurrentRaceCreate(
+                                stat=stat['type'],
+                                total=total,
+                                first=first,
+                                second=second,
+                                third=third,
+                                horse_id=horse_db.id,
+                                race_id=race_db.id,
+                                meeting_id=meeting.id
+                            )
                         )
                     print(f"{current_race.id}")

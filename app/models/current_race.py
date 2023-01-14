@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Integer
+from sqlalchemy import Column, String, ForeignKey, Integer, Float
 from .base_class import Base
 
 
@@ -12,3 +12,4 @@ class CurrentRace(Base):
     horse_id = Column(Integer, ForeignKey('horse.id'), nullable=False)
     race_id = Column(Integer, ForeignKey('race.id'), nullable=False)
     meeting_id = Column(Integer, ForeignKey('meeting.id'), nullable=False)
+    win_ratio = Column(Float, default=0)

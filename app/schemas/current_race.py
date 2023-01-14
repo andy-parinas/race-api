@@ -9,6 +9,7 @@ class CurrentRaceBase(BaseModel):
     third: int
     horse_id: int
     race_id: int
+    meeting_id: int
 
 
 class CurrentRaceCreate(CurrentRaceBase):
