@@ -14,6 +14,19 @@ class XmlParser:
         meeting_date = meeting.find('date', recursive=False)
         return meeting_date.text
 
+    def get_meeting_data(self):
+        meeting = self.soup.find('meeting', recursive=False)
+        meeting_track = meeting.find('track', recursive=False)
+        meeting_date = meeting.find('date', recursive=False)
+        return {
+            "track_name": meeting_track['name'],
+            "track_id": meeting_track['id'],
+            "track_surface": meeting_track['track_surface'],
+            "location": meeting_track['location'],
+            "state": meeting_track['state'],
+            "meeting_date": meeting_date.text
+        }
+
     def get_races(self):
         race_data = self.soup.races
         return race_data.find_all('race', recursive=False)

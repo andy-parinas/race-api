@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import datetime, date
 from app.db.session import SessionLocal
 from app import repositories as repo
 from .xml_parser import XmlParser
+
+from app.schemas.meeting import MeetingCreate
 
 
 def load_db(file):
@@ -14,6 +16,16 @@ def load_db(file):
     races = parser.get_races()
     db = SessionLocal()
     meeting_date = parser.get_meeting_date()
+    meeting_data = parser.get_meeting_data()
+    meeting = repo.meeting.create(db, meeting_in=MeetingCreate(
+        track_name=meeting_data['track_name'],
+        track_id=meeting_data['track_id'],
+        track_surface=meeting_data['track_surface'],
+        location=meeting_data['location'],
+        state=meeting_data['state'],
+        meeting_date=datetime.strptime(meeting_data['meeting_date'], "%d/%m/%Y")
+    ))
+
     for race in races:
         start_time = parser.get_race_start_time(race)
         date_time = f"{meeting_date} {start_time}"
@@ -45,7 +57,8 @@ def load_db(file):
                                 "second": int(stat['seconds']),
                                 "third": int(stat['thirds']),
                                 "horse_id": horse_db.id,
-                                "race_id": race_db.id
+                                "race_id": race_db.id,
+                                "meeting_id": meeting.id
                             }
                         )
                     print(f"{current_race.id}")
