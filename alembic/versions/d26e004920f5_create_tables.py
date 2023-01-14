@@ -1,8 +1,8 @@
-"""Added race, horse, current_race table
+"""create tables
 
-Revision ID: cf15a1bb9a94
+Revision ID: d26e004920f5
 Revises: 
-Create Date: 2022-12-31 11:08:22.647046
+Create Date: 2023-01-14 10:40:55.369698
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cf15a1bb9a94'
+revision = 'd26e004920f5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,6 +25,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_horse_id'), 'horse', ['id'], unique=False)
+    op.create_table('meeting',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('track_name', sa.String(), nullable=True),
+    sa.Column('track_id', sa.String(), nullable=True),
+    sa.Column('track_surface', sa.String(), nullable=True),
+    sa.Column('location', sa.String(), nullable=True),
+    sa.Column('state', sa.String(), nullable=True),
+    sa.Column('meeting_date', sa.Date(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_meeting_id'), 'meeting', ['id'], unique=False)
+    op.create_index(op.f('ix_meeting_track_name'), 'meeting', ['track_name'], unique=False)
     op.create_table('race',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('race_id', sa.String(), nullable=True),
@@ -55,6 +67,9 @@ def downgrade() -> None:
     op.drop_table('currentrace')
     op.drop_index(op.f('ix_race_id'), table_name='race')
     op.drop_table('race')
+    op.drop_index(op.f('ix_meeting_track_name'), table_name='meeting')
+    op.drop_index(op.f('ix_meeting_id'), table_name='meeting')
+    op.drop_table('meeting')
     op.drop_index(op.f('ix_horse_id'), table_name='horse')
     op.drop_table('horse')
     # ### end Alembic commands ###
