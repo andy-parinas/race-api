@@ -7,7 +7,8 @@ from app.schemas.race import RaceCreate
 class RaceRepository:
 
     def create(self, db: Session, race_in: RaceCreate) -> Race:
-        db_obj = Race(**race_in)
+        race_obj = race_in.dict()
+        db_obj = Race(**race_obj)
         db.add(db_obj)
         db.commit()
         return db_obj

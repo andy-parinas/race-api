@@ -5,6 +5,7 @@ from .xml_parser import XmlParser
 
 from app.schemas.meeting import MeetingCreate
 from app.schemas.current_race import CurrentRaceCreate
+from app.schemas.race import RaceCreate
 
 
 
@@ -33,10 +34,12 @@ def load_db(file):
         date_time = f"{meeting_date} {start_time}"
         race_db = repo.race.create(
             db,
-            {
-                "race_id": race['id'],
-                "race_date": datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")
-            }
+            RaceCreate(
+                race_id=race['id'],
+                race_number=int(race['number']),
+                meeting_id=meeting.id,
+                race_date=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")
+            )
         )
         horses = parser.get_race_horses(race)
         for horse in horses:
