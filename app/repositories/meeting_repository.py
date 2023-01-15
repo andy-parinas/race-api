@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 
 from app.models.meting import Meeting
@@ -13,6 +14,9 @@ class MeetingRepository:
         db.add(db_obj)
         db.commit()
         return db_obj
+
+    def get_many(self, db: Session, *, skip:int = 0, limit:int = 0) -> List[Meeting]:
+        return db.query(Meeting).offset(skip).limit(limit).all()
 
 
 meeting = MeetingRepository()

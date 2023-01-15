@@ -1,3 +1,4 @@
+from typing import Sequence
 from datetime import date
 from pydantic import BaseModel
 
@@ -14,3 +15,16 @@ class MeetingBase(BaseModel):
 class MeetingCreate(MeetingBase):
     ...
 
+
+class MeetingInDbBase(MeetingBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class Meeting(MeetingInDbBase):
+    ...
+
+class MeetingListResults(BaseModel):
+    results: Sequence[Meeting]
