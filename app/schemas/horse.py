@@ -7,4 +7,4 @@ class HorseBase(BaseModel):
 
 
 class HorseCreate(HorseBase):
-    ...
+    race_id: int

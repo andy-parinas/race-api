@@ -6,8 +6,9 @@ from app.schemas.horse import HorseCreate
 
 class HorseRepository:
 
-    def create(self, db: Session, horse_in: HorseCreate):
-        db_obj = Horse(**horse_in)
+    def create(self, db: Session, obj_in: HorseCreate):
+        horse_obj = obj_in.dict()
+        db_obj = Horse(**horse_obj)
         db.add(db_obj)
         db.commit()
         return db_obj

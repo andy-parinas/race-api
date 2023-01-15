@@ -6,6 +6,7 @@ from .xml_parser import XmlParser
 from app.schemas.meeting import MeetingCreate
 from app.schemas.current_race import CurrentRaceCreate
 from app.schemas.race import RaceCreate
+from app.schemas.horse import HorseCreate
 
 
 
@@ -45,10 +46,11 @@ def load_db(file):
         for horse in horses:
             horse_db = repo.horse.create(
                 db,
-                {
-                    "horse_id":  horse['id'],
-                    "horse_name": horse['name']
-                }
+                HorseCreate(
+                    horse_id=horse['id'],
+                    horse_name=horse['name'],
+                    race_id=race_db.id
+                )
             )
             statistics = parser.get_horse_stats(horse)
             for stat in statistics:
