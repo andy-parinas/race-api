@@ -1,3 +1,5 @@
+from typing import List
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.schemas.current_race import CurrentRaceCreate
@@ -20,6 +22,13 @@ class CurrentRaceRepository:
         db.add(db_obj)
         db.commit()
         return db_obj
+
+    def get_races_statement(self, db:Session, preference: List[str], race_ids: List[int]):
+        statement = db.query(CurrentRace) \
+                    .filter(CurrentRace.stat.in_(preference)) \
+                    .filter(and_(CurrentRace.race_id.in_(race_ids))).statement
+
+        return statement
 
 
 current_race = CurrentRaceRepository()
