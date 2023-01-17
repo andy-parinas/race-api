@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 
 from app.models.horse import Horse
@@ -12,6 +13,10 @@ class HorseRepository:
         db.add(db_obj)
         db.commit()
         return db_obj
+
+    def get_horses_from_ids(self, db: Session, ids: List[int]) ->List[Horse]:
+        horses = db.query(Horse).filter(Horse.id.in_(ids)).all()
+        return horses
 
 
 horse = HorseRepository()

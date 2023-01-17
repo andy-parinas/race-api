@@ -1,9 +1,13 @@
+import pandas as pd
+from pandas import DataFrame
 from typing import List
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+
 from app.schemas.current_race import CurrentRaceCreate
 from app.models.current_race import CurrentRace
+
 
 
 def calculate_win_ratio(total, first, second, third):
@@ -23,12 +27,14 @@ class CurrentRaceRepository:
         db.commit()
         return db_obj
 
-    def get_races_statement(self, db:Session, preference: List[str], race_ids: List[int]):
+    def get_races_dataframe(self, db:Session, preference: List[str], race_ids: List[int]):
         statement = db.query(CurrentRace) \
                     .filter(CurrentRace.stat.in_(preference)) \
                     .filter(and_(CurrentRace.race_id.in_(race_ids))).statement
 
-        return statement
+        df = pd.read_sql_query(statement, con=db.connection())
+
+        return df
 
 
 current_race = CurrentRaceRepository()

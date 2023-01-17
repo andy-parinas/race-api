@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.schemas.analysis import Preference
 from app import repositories as repo
+from app.schemas.horse import Horse
 
 class AnalysisService:
 
@@ -31,23 +32,44 @@ class AnalysisService:
             "weights": weights
         }
 
+    def analyse_race(self, df: DataFrame, weighted_condition):
+        
+        df['multiplier'] = np.select(weighted_condition['conditions'], weighted_condition['weights'], 0)
+        df['results'] = (df['win_ratio'] * df['multiplier']) * 100
+        df = df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(3)
+
+        return df.to_dict()
+
+
     def get_top_hoses(self, db: Session, preference: Preference, race_ids: List[int]):
         pref_dict = dict(preference)
         prefs = list(pref_dict.values())
 
-        race_stmt = repo.current_race.get_races_statement(db, prefs, race_ids)
-        df = pd.read_sql_query(race_stmt, con=db.connection())
+        df = repo.current_race.get_races_dataframe(db, prefs, race_ids)
+        weighted_condition = self.get_condition_weight(df, preference)
 
-        condition = self.get_condition_weight(df, preference)
+        analysis = self.analyse_race(df, weighted_condition)
+        horses = repo.horse.get_horses_from_ids(db, list(analysis.keys()))
 
-        df = self.compute_pref_multiplier(df, conditions=condition['conditions'], pref_weight=condition['weights'])
 
-        df['results'] = (df['win_ratio'] * df['multiplier']) * 100
 
-        df = df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(3)
+        result = []
+        for horse in horses:
+            setattr(horse, 'rating', analysis[horse.id])
+            """
+            Crude way of converting the SQLAlchemy model into
+            Dictionary
+            """
+            result.append({
+                "id": horse.id,
+                "horse_id": horse.horse_id,
+                "horse_name": horse.horse_name,
+                "rating": horse.rating,
+                "race_id": horse.race_id
+            })
 
-        print(df)
-        return prefs
+        sorted_result = sorted(result, key=lambda d: d['rating'], reverse=True)
+        return sorted_result
 
 
 analysis = AnalysisService()
