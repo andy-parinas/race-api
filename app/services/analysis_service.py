@@ -52,10 +52,10 @@ class AnalysisService:
         horses = repo.horse.get_horses_from_ids(db, list(analysis.keys()))
 
 
-
+        print(analysis)
         result = []
         for horse in horses:
-            setattr(horse, 'rating', analysis[horse.id])
+            # setattr(horse, 'rating', analysis[horse.id])
             """
             Crude way of converting the SQLAlchemy model into
             Dictionary
@@ -64,7 +64,7 @@ class AnalysisService:
                 "id": horse.id,
                 "horse_id": horse.horse_id,
                 "horse_name": horse.horse_name,
-                "rating": horse.rating,
+                "rating": analysis[horse.id],
                 "race_id": horse.race_id
             })
 

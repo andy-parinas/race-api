@@ -11,6 +11,7 @@ class HorseCreate(HorseBase):
     race_id: int
 
 class HorseInDbBase(HorseBase):
+    id: int
     race_id: int
 
     class Config:
