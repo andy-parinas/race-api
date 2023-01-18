@@ -15,15 +15,15 @@ class RaceRepository:
         return db_obj
 
     def get_race_list(self, db: Session, *, 
-        meeting_id: int|None = None,
+        meeting_ids: List[int]|None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> List[Race]:
 
         query = db.query(Race)
 
-        if meeting_id:
-            query = query.filter(Race.meeting_id == meeting_id)
+        if meeting_ids:
+            query = query.filter(Race.meeting_id.in_(meeting_ids))
 
         return query.order_by(Race.race_number).offset(skip).limit(limit).all()
 

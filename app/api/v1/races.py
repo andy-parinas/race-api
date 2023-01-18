@@ -4,17 +4,25 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app import repositories as repo
+from app.schemas.meeting import MeetingData
 
 router = APIRouter()
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.post("/", status_code=status.HTTP_200_OK)
 def get_races(
-    meeting_id: int|None = None,
+    meeting_data: MeetingData,
     page: int = 1,
-    max_results: int = 10,
+    max_results: int = 100,
     db: Session = Depends(get_db)
 ):
     skip = (page -1) * max_results
 
-    return repo.race.get_race_list(db, skip=skip, limit=max_results, meeting_id=meeting_id)
+    if meeting_data is not None:
+        results = repo.race.get_race_list(db, skip=skip, limit=max_results, meeting_ids=meeting_data.meeting_ids)
+    else:
+        results = repo.race.get_race_list(db, skip=skip, limit=max_results)
+
+    return {
+        "results": results
+    }

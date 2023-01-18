@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, List
 from datetime import date
 from pydantic import BaseModel
 
@@ -28,3 +28,7 @@ class Meeting(MeetingInDbBase):
 
 class MeetingListResults(BaseModel):
     results: Sequence[Meeting]
+
+
+class MeetingData(BaseModel):
+    meeting_ids: List[int]
