@@ -6,6 +6,7 @@ class RaceBase(BaseModel):
     race_id: str
     race_date: datetime
     race_number: int
+    distance: int
     
 
 

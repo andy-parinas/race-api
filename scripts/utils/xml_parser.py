@@ -35,6 +35,10 @@ class XmlParser:
         start_time = race.find('start_time', recursive=False )
         return start_time.text
 
+    def get_race_distance(self, race):
+        distance = race.find('distance',recursive=False )
+        return distance['metres']
+
     def get_race_horses(self, race: Tag) -> ResultSet:
         horses_data = race.find('horses', recursive=False)
         return horses_data.find_all('horse', recursive=False)

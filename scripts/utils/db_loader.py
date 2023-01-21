@@ -39,7 +39,8 @@ def load_db(file):
                 race_id=race['id'],
                 race_number=int(race['number']),
                 meeting_id=meeting.id,
-                race_date=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")
+                race_date=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p"),
+                distance=parser.get_race_distance(race)
             )
         )
         horses = parser.get_race_horses(race)

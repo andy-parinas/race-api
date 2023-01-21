@@ -8,4 +8,5 @@ class Race(Base):
     race_id = Column(String)
     race_date = Column(DateTime)
     race_number = Column(Integer)
-    meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=False)
+    distance = Column(Integer)
+    meeting_id = Column(Integer, ForeignKey("meeting.id", name="race_meeting_fk"), nullable=False)
