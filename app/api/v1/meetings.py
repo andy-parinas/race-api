@@ -10,7 +10,7 @@ from app.db.session import get_db
 router = APIRouter()
 
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
+@router.post("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
 def get_meetings(
     page: Optional[int] = 1,
     max_results: Optional[int] = 10,
