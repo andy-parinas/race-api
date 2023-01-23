@@ -36,7 +36,7 @@ class AnalysisService:
         
         df['multiplier'] = np.select(weighted_condition['conditions'], weighted_condition['weights'], 0)
         df['results'] = (df['win_ratio'] * df['multiplier']) * 100
-        df = df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(3)
+        df = df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(5)
 
         return df.to_dict()
 
