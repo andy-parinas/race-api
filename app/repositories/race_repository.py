@@ -27,5 +27,7 @@ class RaceRepository:
 
         return query.order_by(Race.race_number).offset(skip).limit(limit).all()
 
+    def get_race_by_id(self, db: Session, *, race_id:int) -> Race:
+        return db.query(Race).filter(Race.id == race_id).first()
 
 race = RaceRepository()

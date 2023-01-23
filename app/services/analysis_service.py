@@ -10,13 +10,6 @@ from app.schemas.horse import Horse
 
 class AnalysisService:
 
-    def compute_pref_multiplier(self, df: DataFrame, 
-        conditions: List[bool], pref_weight: List[float]
-    ) -> DataFrame:
-
-        df['multiplier'] = np.select(conditions, pref_weight, 0)
-
-        return df 
 
     def get_condition_weight(self,df: DataFrame, preference: Preference):
         conditions = [
@@ -32,14 +25,30 @@ class AnalysisService:
             "weights": weights
         }
 
-    def analyse_race(self, df: DataFrame, weighted_condition):
+    def apply_condition(self, df: DataFrame, weighted_condition):
         
         df['multiplier'] = np.select(weighted_condition['conditions'], weighted_condition['weights'], 0)
         df['results'] = (df['win_ratio'] * df['multiplier']) * 100
+
+        return df
+        
+    def get_race_top_results(self, df: DataFrame):
         df = df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(5)
 
         return df.to_dict()
 
+    def analyse(self,  preference: Preference, race_ids: List[int], df: DataFrame):
+        weighted_condition = self.get_condition_weight(df, preference)
+        df = self.apply_condition(df, weighted_condition=weighted_condition)
+
+        analysis_results = {}
+
+        for race_id in race_ids:
+            race_df = df.loc[df['race_id'] == race_id]
+            race_result = self.get_race_top_results(race_df)
+            analysis_results[race_id] = race_result
+
+        return analysis_results
 
     def get_top_hoses(self, db: Session, preference: Preference, race_ids: List[int]):
         pref_dict = dict(preference)
@@ -48,7 +57,7 @@ class AnalysisService:
         df = repo.current_race.get_races_dataframe(db, prefs, race_ids)
         weighted_condition = self.get_condition_weight(df, preference)
 
-        analysis = self.analyse_race(df, weighted_condition)
+        analysis = self.apply_condition(df, weighted_condition)
         horses = repo.horse.get_horses_from_ids(db, list(analysis.keys()))
 
 
