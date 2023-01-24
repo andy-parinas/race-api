@@ -31,32 +31,45 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_d
     Get the Dataframes from the database
     """
     df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
-
     analysis_results = analysis.analyse(analysis_in.preference, analysis_in.race_ids, df)
 
-    final_result = []
-    for result in analysis_results:
-        race = repo.race.get_race_by_id(db, race_id=result)
-        race_dict = {
-            "race_number": race.race_number,
-            "date": race.race_date,
-            "meeting_id": race.meeting_id
-        }
-        horse_results = analysis_results[result]
-        horse_ids = list(horse_results.keys())
-        horses = repo.horse.get_horses_from_ids(db, ids=horse_ids)
-        horse_array = []
-        for horse in horses:
-            horse_array.append({
-                "id": horse.id,
-                "horse_id": horse.horse_id,
-                "horse_name": horse.horse_name,
-                "rating": horse_results[horse.id],
-                "race_id": horse.race_id
-            })
+    final_results = __get_final_results(db, analysis_results)
 
-        sorted_horses = sorted(horse_array, key=lambda d: d['rating'], reverse=True)
-        race_dict["horses"] = sorted_horses
-        final_result.append(race_dict)
+    return {"results": final_results}
+
+
+def __get_final_results(db: Session, analysis_results):
+    final_result = []
+    for result_key in analysis_results:
+        
+        race = __get_races_from_analysis(db, result_key)
+        horses = __get_horses_from_analysis(db, analysis_results[result_key])
+        
+        race["horses"] = horses
+        final_result.append(race)
 
     return final_result
+
+
+def __get_races_from_analysis(db: Session, race_id):
+    race = repo.race.get_race_by_id(db, race_id=race_id)
+    return {
+        "race_number": race.race_number,
+        "date": race.race_date,
+        "meeting_id": race.meeting_id
+    }
+
+def __get_horses_from_analysis(db: Session, horses_dict):
+    horse_ids = list(horses_dict.keys())
+    horses = repo.horse.get_horses_from_ids(db, ids=horse_ids)
+    horse_array = []
+    for horse in horses:
+        horse_array.append({
+            "id": horse.id,
+            "horse_id": horse.horse_id,
+            "horse_name": horse.horse_name,
+            "rating": horses_dict[horse.id],
+            "race_id": horse.race_id
+        })
+
+    return sorted(horse_array, key=lambda d: d['rating'], reverse=True)
