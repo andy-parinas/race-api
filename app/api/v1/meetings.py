@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 
-from app.schemas.meeting import MeetingListResults
+from app.schemas.meeting import MeetingListResults, MeetingQuery
 from app import repositories as repo
 from app.db.session import get_db
 
@@ -10,13 +10,13 @@ from app.db.session import get_db
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
+# @router.post("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
+@router.post("/", status_code=status.HTTP_200_OK)
 def get_meetings(
-    page: Optional[int] = 1,
-    max_results: Optional[int] = 10,
+    query_in: MeetingQuery,
     db:Session = Depends(get_db)
 ):
-    offset = (page - 1) * max_results
-    results = repo.meeting.get_many(db, skip=offset, limit=max_results)
+    offset = (query_in.page - 1) * query_in.max_results
+    results = repo.meeting.get_many(db, skip=offset, limit=query_in.max_results, state=query_in.state)
 
     return {"results": list(results)}

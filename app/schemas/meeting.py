@@ -1,4 +1,4 @@
-from typing import Sequence, List
+from typing import Sequence, List, Optional
 from datetime import date
 from pydantic import BaseModel
 
@@ -11,6 +11,11 @@ class MeetingBase(BaseModel):
     state: str
     meeting_date: date
 
+
+class MeetingQuery(BaseModel):
+    state: Optional[str]
+    page: int = 1
+    max_results: int = 10
 
 class MeetingCreate(MeetingBase):
     ...
