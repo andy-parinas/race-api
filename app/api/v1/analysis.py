@@ -5,18 +5,26 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import analysis
+from app.services.analysis_service import analysis, Preference
 
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_200_OK, response_model=HorseListResult)
+@router.post("/", status_code=status.HTTP_200_OK)
 def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
-    result = analysis.get_top_hoses(db, analysis_in.preference, analysis_in.race_ids)
+
+    """
+    Extract the Preferences into a list
+    """
+    prefs = __get_preferences(analysis_in.preference)
+    df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
+    analysis_results = analysis.analyse(analysis_in.preference, analysis_in.race_ids, df)
+
+    final_result = __get_horses_from_analysis(db, analysis_results)
 
 
     # return list(result)
-    return {"results": result}
+    return {"results": final_result}
 
 
 @router.post("/advance", status_code=status.HTTP_200_OK)
@@ -24,8 +32,8 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_d
     """
     Extract the Preferences into a list
     """
-    pref_dict = dict(analysis_in.preference)
-    prefs = list(pref_dict.values())
+    # pref_dict = dict(analysis_in.preference)
+    prefs = __get_preferences(analysis_in.preference)
 
     """
     Get the Dataframes from the database
@@ -36,6 +44,11 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_d
     final_results = __get_final_results(db, analysis_results)
 
     return {"results": final_results}
+
+
+def __get_preferences(preferences: Preference):
+    pref_dict = dict(preferences)
+    return list(pref_dict.values())
 
 
 def __get_final_results(db: Session, analysis_results):

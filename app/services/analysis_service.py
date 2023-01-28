@@ -41,14 +41,36 @@ class AnalysisService:
         weighted_condition = self.get_condition_weight(df, preference)
         df = self.apply_condition(df, weighted_condition=weighted_condition)
 
-        analysis_results = {}
+        results = self.get_race_top_results(df=df)
 
-        for race_id in race_ids:
-            race_df = df.loc[df['race_id'] == race_id]
-            race_result = self.get_race_top_results(race_df)
-            analysis_results[race_id] = race_result
+  
+        # for race_id in race_ids:
+        #     race_df = df.loc[df['race_id'] == race_id]
+        #     race_result = self.get_race_top_results(race_df)
+        #     analysis_results[race_id] = race_result
 
-        return analysis_results
+        return results
+
+
+    def get_horses_top_results(self,db:Session, results):
+        horses = repo.horse.get_horses_from_ids(db, list(results.keys()))
+        result = []
+        for horse in horses:
+            # setattr(horse, 'rating', analysis[horse.id])
+            """
+            Crude way of converting the SQLAlchemy model into
+            Dictionary
+            """
+            result.append({
+                "id": horse.id,
+                "horse_id": horse.horse_id,
+                "horse_name": horse.horse_name,
+                "rating": analysis[horse.id],
+                "race_id": horse.race_id
+            })
+
+        sorted_result = sorted(result, key=lambda d: d['rating'], reverse=True)
+        return sorted_result
 
     def get_top_hoses(self, db: Session, preference: Preference, race_ids: List[int]):
         pref_dict = dict(preference)
@@ -60,8 +82,6 @@ class AnalysisService:
         analysis = self.apply_condition(df, weighted_condition)
         horses = repo.horse.get_horses_from_ids(db, list(analysis.keys()))
 
-
-        print(analysis)
         result = []
         for horse in horses:
             # setattr(horse, 'rating', analysis[horse.id])
