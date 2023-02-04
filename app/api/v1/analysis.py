@@ -1,3 +1,4 @@
+import pprint
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 
@@ -77,12 +78,17 @@ def __get_horses_from_analysis(db: Session, horses_dict):
     horses = repo.horse.get_horses_from_ids(db, ids=horse_ids)
     horse_array = []
     for horse in horses:
+        print(horse.race.meeting.track_name)
         horse_array.append({
             "id": horse.id,
             "horse_id": horse.horse_id,
             "horse_name": horse.horse_name,
             "rating": horses_dict[horse.id],
-            "race_id": horse.race_id
+            "race_id": horse.race_id,
+            "race_number": horse.race.race_number,
+            "meeting": horse.race.meeting.track_name,
+            "date": horse.race.meeting.meeting_date,
+            "state": horse.race.meeting.state
         })
 
     return sorted(horse_array, key=lambda d: d['rating'], reverse=True)

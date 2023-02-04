@@ -1,7 +1,8 @@
 from typing import List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.horse import Horse
+from app.models.race import Race
 from app.schemas.horse import HorseCreate
 
 
@@ -15,7 +16,8 @@ class HorseRepository:
         return db_obj
 
     def get_horses_from_ids(self, db: Session, ids: List[int]) ->List[Horse]:
-        horses = db.query(Horse).filter(Horse.id.in_(ids)).all()
+        # horses = db.query(Horse).filter(Horse.id.in_(ids)).all()
+        horses = db.query(Horse).options(joinedload(Horse.race).joinedload(Race.meeting)).filter(Horse.id.in_(ids)).all()
         return horses
 
 

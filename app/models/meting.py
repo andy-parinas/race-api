@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.orm import relationship
 from .base_class import Base
 
 
@@ -10,3 +11,4 @@ class Meeting(Base):
     location = Column(String)
     state = Column(String)
     meeting_date = Column(Date)
+    races = relationship("Race", back_populates="meeting")
