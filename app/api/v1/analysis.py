@@ -6,7 +6,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import analysis, Preference
+from app.services.analysis_service import AnalysisService, Preference
 
 router = APIRouter()
 
@@ -14,15 +14,23 @@ router = APIRouter()
 @router.post("/", status_code=status.HTTP_200_OK)
 def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
 
+
     """
     Extract the Preferences into a list
     """
     prefs = __get_preferences(analysis_in.preference)
     df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
-    analysis_results = analysis.analyse(analysis_in.preference, analysis_in.race_ids, df)
+
+    analysis = AnalysisService(df=df, prefrerences=analysis_in.preferences, 
+                        preference_type=analysis_in.preference_type)
+
+    print(analysis_in.preference_type)
+
+    analysis_results = analysis.analyse()
 
     final_result = __get_horses_from_analysis(db, analysis_results)
 
+    print(analysis_in)
 
     # return list(result)
     return {"results": final_result}
