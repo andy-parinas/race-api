@@ -15,6 +15,6 @@ class Preference(BaseModel):
 
 class AnalsyisInput(BaseModel):
     race_ids: List[int]
-    preference: Preference
+    preference: Optional[Preference]
     preferences: Optional[List[str]]
     preference_type: PreferenceType

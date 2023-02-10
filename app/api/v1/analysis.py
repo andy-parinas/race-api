@@ -18,7 +18,8 @@ def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
     """
     Extract the Preferences into a list
     """
-    prefs = __get_preferences(analysis_in.preference)
+    # prefs = __get_preferences(analysis_in.preference)
+    prefs = analysis_in.preferences
     df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
 
     analysis = AnalysisService(df=df, prefrerences=analysis_in.preferences, 
