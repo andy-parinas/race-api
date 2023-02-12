@@ -1,5 +1,6 @@
 import pprint
 from fastapi import APIRouter, status, Depends
+from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 
 from app import repositories as repo
@@ -22,18 +23,17 @@ def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
     prefs = analysis_in.preferences
     df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
 
+    if df.empty:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Races not found")
+
     analysis = AnalysisService(df=df, prefrerences=analysis_in.preferences, 
                         preference_type=analysis_in.preference_type)
-
-    print(analysis_in.preference_type)
 
     analysis_results = analysis.analyse()
 
     final_result = __get_horses_from_analysis(db, analysis_results)
 
-    print(analysis_in)
 
-    # return list(result)
     return {"results": final_result}
 
 

@@ -48,21 +48,6 @@ class AnalysisService:
         else:
             return None
 
-    def get_condition_weight(self):
-
-        conditions = [
-            self.df['stat'] == self.preference.first,
-            self.df['stat'] == self.preference.second,
-            self.df['stat'] == self.preference.third
-        ]
-        
-        weights = [0.60, 0.30, 0.10]
-
-        return {
-            "conditions": conditions,
-            "weights": weights
-        }
-
     def apply_condition(self, weighted_condition):
         
         self.df['multiplier'] = np.select(weighted_condition['conditions'], weighted_condition['weights'], 0)
@@ -71,7 +56,6 @@ class AnalysisService:
         
     def get_race_top_results(self):
         self.df = self.df.groupby(['horse_id'])['results'].sum().sort_values(ascending=False).nlargest(5)
-
         return self.df.to_dict()
 
     """
@@ -86,54 +70,6 @@ class AnalysisService:
 
         return results
 
-
-    # def get_horses_top_results(self,db:Session, results):
-    #     horses = repo.horse.get_horses_from_ids(db, list(results.keys()))
-    #     result = []
-    #     for horse in horses:
-    #         # setattr(horse, 'rating', analysis[horse.id])
-    #         """
-    #         Crude way of converting the SQLAlchemy model into
-    #         Dictionary
-    #         """
-    #         result.append({
-    #             "id": horse.id,
-    #             "horse_id": horse.horse_id,
-    #             "horse_name": horse.horse_name,
-    #             "rating": analysis[horse.id],
-    #             "race_id": horse.race_id
-    #         })
-
-    #     sorted_result = sorted(result, key=lambda d: d['rating'], reverse=True)
-    #     return sorted_result
-
-    # def get_top_hoses(self, db: Session, preference: Preference, race_ids: List[int]):
-    #     pref_dict = dict(preference)
-    #     prefs = list(pref_dict.values())
-
-    #     df = repo.current_race.get_races_dataframe(db, prefs, race_ids)
-    #     weighted_condition = self.get_condition_weight(df, preference)
-
-    #     analysis = self.apply_condition(df, weighted_condition)
-    #     horses = repo.horse.get_horses_from_ids(db, list(analysis.keys()))
-
-    #     result = []
-    #     for horse in horses:
-    #         # setattr(horse, 'rating', analysis[horse.id])
-    #         """
-    #         Crude way of converting the SQLAlchemy model into
-    #         Dictionary
-    #         """
-    #         result.append({
-    #             "id": horse.id,
-    #             "horse_id": horse.horse_id,
-    #             "horse_name": horse.horse_name,
-    #             "rating": analysis[horse.id],
-    #             "race_id": horse.race_id
-    #         })
-
-    #     sorted_result = sorted(result, key=lambda d: d['rating'], reverse=True)
-    #     return sorted_result
 
 
 # analysis = AnalysisService()
