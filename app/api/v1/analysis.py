@@ -7,7 +7,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import AnalysisService, Preference
+from app.services.analysis_service import AnalysisService, Preference, BayseAnalysis
 
 router = APIRouter()
 
@@ -29,6 +29,7 @@ def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
     analysis = AnalysisService(df=df, prefrerences=analysis_in.preferences, 
                         preference_type=analysis_in.preference_type)
 
+
     analysis_results = analysis.analyse()
 
     final_result = __get_horses_from_analysis(db, analysis_results)
@@ -39,22 +40,24 @@ def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
 
 @router.post("/advance", status_code=status.HTTP_200_OK)
 def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
-    """
-    Extract the Preferences into a list
-    """
-    # pref_dict = dict(analysis_in.preference)
-    prefs = __get_preferences(analysis_in.preference)
-
-    """
-    Get the Dataframes from the database
-    """
+    prefs = analysis_in.preferences
     df = repo.current_race.get_races_dataframe(db, prefs, analysis_in.race_ids)
-    analysis_results = analysis.analyse(analysis_in.preference, analysis_in.race_ids, df)
 
-    final_results = __get_final_results(db, analysis_results)
+    if df.empty:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Races not found")
 
-    return {"results": final_results}
+    bayes = BayseAnalysis(df=df, prefrerences=analysis_in.preferences, 
+                        preference_type=analysis_in.preference_type)
 
+
+    data = bayes.transform_dataframe()
+    likelihood = bayes.get_likelihood(data)
+
+    results = bayes.get_probability(data, likelihood)
+
+    return {
+        "results": results
+    }
 
 def __get_preferences(preferences: Preference):
     pref_dict = dict(preferences)
