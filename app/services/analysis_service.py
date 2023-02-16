@@ -135,7 +135,7 @@ class BayseAnalysis(AnalysisBase):
         data["posterior_probability"] = round(data["unnormalized_posterior"] / normalization_factor, 2)
 
         data = data.sort_values(['posterior_probability'], ascending= [False])
-        print(data)
-        return data.head(5).to_dict()
+
+        return data.head(5)['posterior_probability'].to_dict()
 
     
