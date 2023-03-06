@@ -2,7 +2,7 @@ from typing import List
 import pandas as pd
 import numpy as np
 from pandas import DataFrame, Series
-from typing import List
+from typing import List, Tuple
 from sqlalchemy.orm import Session
 
 from app.schemas.analysis import Preference
@@ -12,10 +12,10 @@ from app.schemas.analysis import PreferenceType
 
 
 class AnalysisBase:
-    def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
+    def __init__(self, df: DataFrame, prefrerences: Tuple[str], preference_type: PreferenceType) -> None:
         self.df = df
-        if "all" in prefrerences:
-            prefrerences.remove("all")
+        if "all" not in prefrerences:
+            prefrerences.append("all")
         self.preferences = tuple(prefrerences)
         self.preference_type = preference_type
         self.preferences_count = len(self.preferences)
