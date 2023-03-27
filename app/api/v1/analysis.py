@@ -40,6 +40,9 @@ def _get_analysis_from_races(db: Session, races_ids, preferences: List[str], pre
 
         analysis_results = _get_bayes_results(df, preferences, preference_type )
 
+        if not analysis_results:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No results found. Statistics does not have enough information.")
+
         analysis_df = DataFrame.from_dict(analysis_results, orient='index', columns=['rating'])
         analysis_df.index.name = 'horse_id'
 

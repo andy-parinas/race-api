@@ -132,6 +132,10 @@ class BayseAnalysis(AnalysisBase):
         data['prior'] = data['all']
         data["unnormalized_posterior"] =  data['prior'] * data['likelihood']
         normalization_factor = data["unnormalized_posterior"].sum()
+        
+        if normalization_factor == 0:
+            return None
+        
         data["posterior_probability"] = round(data["unnormalized_posterior"] / normalization_factor, 2)
 
         data = data.sort_values(['posterior_probability'], ascending= [False])
