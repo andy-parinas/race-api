@@ -1,4 +1,4 @@
-import pprint
+from typing import List
 from fastapi import APIRouter, status, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
@@ -13,30 +13,8 @@ from app.services.analysis_service import AnalysisService, Preference, BayseAnal
 router = APIRouter()
 
 
+
 @router.post("/", status_code=status.HTTP_200_OK)
-def analyse_race(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
-
-    race_id = analysis_in.race_ids[0]
-
-    prefs = analysis_in.preferences
-    df = repo.current_race.get_race_dataframe(db, prefs, race_id)
-
-    if df.empty:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Races not found")
-
-    analysis = AnalysisService(df=df, prefrerences=analysis_in.preferences, 
-                        preference_type=analysis_in.preference_type)
-
-
-    analysis_results = analysis.analyse()
-
-    final_result = __get_horses_from_analysis(db, analysis_results)
-
-
-    return {"results": final_result}
-
-
-@router.post("/advance", status_code=status.HTTP_200_OK)
 def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_db)):
 
     results = _get_analysis_from_races(db, analysis_in.race_ids, analysis_in.preferences, analysis_in.preference_type)
@@ -46,8 +24,13 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_d
     }
 
 
-def _get_analysis_from_races(db: Session, races_ids, preferences, preference_type):
+
+
+def _get_analysis_from_races(db: Session, races_ids, preferences: List[str], preference_type):
     final_df = DataFrame()
+
+    if "all" not in preferences:
+        preferences.append("all")
 
     for race_id in races_ids:
    
@@ -78,31 +61,7 @@ def _get_bayes_results(df: DataFrame, preferences, preference_type):
 
     return bayes.get_probability(data, likelihood)
 
-# def __get_preferences(preferences: Preference):
-#     pref_dict = dict(preferences)
-#     return list(pref_dict.values())
 
-
-# def __get_final_results(db: Session, analysis_results):
-#     final_result = []
-#     for result_key in analysis_results:
-        
-#         race = __get_races_from_analysis(db, result_key)
-#         horses = __get_horses_from_analysis(db, analysis_results[result_key])
-        
-#         race["horses"] = horses
-#         final_result.append(race)
-
-#     return final_result
-
-
-# def __get_races_from_analysis(db: Session, race_id):
-#     race = repo.race.get_race_by_id(db, race_id=race_id)
-#     return {
-#         "race_number": race.race_number,
-#         "date": race.race_date,
-#         "meeting_id": race.meeting_id
-#     }
 
 def __get_horses_from_analysis(db: Session, horses_dict):
     horse_ids = list(horses_dict.keys())
