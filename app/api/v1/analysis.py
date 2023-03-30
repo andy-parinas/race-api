@@ -8,7 +8,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import AnalysisService, Preference, BayseAnalysis
+from app.services.analysis_service import Preference, BayseAnalysis
 
 router = APIRouter()
 
@@ -29,12 +29,13 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db:Session = Depends(get_d
 def _get_analysis_from_races(db: Session, races_ids, preferences: List[str], preference_type):
     final_df = DataFrame()
 
-    if "all" not in preferences:
-        preferences.append("all")
+    preferences_with_all = preferences.copy()
+    preferences_with_all.append("all")
+
 
     for race_id in races_ids:
    
-        df = repo.current_race.get_race_dataframe(db, preferences ,race_id)
+        df = repo.current_race.get_race_dataframe(db, preferences_with_all ,race_id)
         if df.empty:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Races not found")
 
