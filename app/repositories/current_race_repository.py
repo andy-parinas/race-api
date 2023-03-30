@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame
-from typing import List
+from typing import List, Tuple
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -32,6 +32,14 @@ class CurrentRaceRepository:
                     .filter(CurrentRace.stat.in_(preference)) \
                     .filter(and_(CurrentRace.race_id.in_(race_ids))).statement
 
+        df = pd.read_sql_query(statement, con=db.connection())
+
+        return df
+    
+    def get_race_dataframe(self, db:Session, preference: Tuple[str], race_id: int):
+        statement = db.query(CurrentRace) \
+                    .filter(CurrentRace.stat.in_(preference)) \
+                    .filter(and_(CurrentRace.race_id == race_id)).statement
         df = pd.read_sql_query(statement, con=db.connection())
 
         return df

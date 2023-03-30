@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.models.meting import Meeting
@@ -15,8 +15,18 @@ class MeetingRepository:
         db.commit()
         return db_obj
 
-    def get_many(self, db: Session, *, skip:int = 0, limit:int = 0) -> List[Meeting]:
-        return db.query(Meeting).offset(skip).limit(limit).all()
+    def get_many(self, 
+        db: Session, *, 
+        skip:int = 0, 
+        limit:int = 0, 
+        state: Optional[str] = None
+    ) -> List[Meeting]:
+        query = db.query(Meeting)
+
+        if state is not None:
+            query = query.filter(Meeting.state == state)
+
+        return query.offset(skip).limit(limit).all()
 
 
 meeting = MeetingRepository()

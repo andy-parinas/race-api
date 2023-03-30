@@ -11,7 +11,7 @@ from app.schemas.horse import HorseCreate
 
 
 def load_db(file):
-    allowed_stat = ['track', 'distance', 'distance_track',
+    allowed_stat = ['all', 'track', 'distance', 'distance_track',
                     'firm', 'good', 'soft', 'heavy', 'synthetic',
                     'first_up', 'second_up', 'current_jockey'
                     ]
