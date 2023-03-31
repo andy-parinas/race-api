@@ -69,13 +69,17 @@ class BayseAnalysis(AnalysisBase):
         data = data.merge(pd.DataFrame(likelihood.rename('likelihood')), left_index=True, right_index=True)
 
         data['prior'] = data['all']
-        data["unnormalized_posterior"] =  data['prior'] * data['likelihood']
+        if (data['prior'] == 0).all():
+            data['unnormalized_posterior'] = data['likelihood']
+        else:
+            data["unnormalized_posterior"] =  data['prior'] * data['likelihood']
+
         normalization_factor = data["unnormalized_posterior"].sum()
         
         if normalization_factor == 0:
-            return None
-        
-        data["posterior_probability"] = round(data["unnormalized_posterior"] / normalization_factor, 2)
+            data["posterior_probability"] = 0
+        else:
+            data["posterior_probability"] = round(data["unnormalized_posterior"] / normalization_factor, 2)
 
         data = data.sort_values(['posterior_probability'], ascending= [False])
 
