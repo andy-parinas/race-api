@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -60,8 +61,10 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+
     configuration = config.get_section(config.config_ini_section)
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}?sslmode=require"
+    
     configuration['sqlalchemy.url'] = SQLALCHEMY_DATABASE_URI
     connectable = engine_from_config(
         configuration,
