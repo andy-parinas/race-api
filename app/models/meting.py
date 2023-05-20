@@ -10,5 +10,5 @@ class Meeting(Base):
     track_surface = Column(String)
     location = Column(String)
     state = Column(String)
-    meeting_date = Column(Date)
+    date = Column(Date)
     races = relationship("Race", back_populates="meeting")
