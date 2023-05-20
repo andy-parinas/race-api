@@ -9,7 +9,7 @@ class MeetingBase(BaseModel):
     track_surface: str
     location: str
     state: str
-    meeting_date: date
+    date: date
 
 
 class MeetingQuery(BaseModel):

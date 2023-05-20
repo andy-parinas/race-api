@@ -2,3 +2,5 @@ from .race_repository import race
 from .horse_repository import horse
 from .current_race_repository import current_race
 from .meeting_repository import meeting
+from .horse_race_stat_repository import horse_race_stats
+from .horse_race_info_repository import horse_race_info

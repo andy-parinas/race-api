@@ -46,6 +46,30 @@ class XmlParser:
     def get_horse_stats(self, horse: Tag):
         statistics_data = horse.find('statistics', recursive=False)
         return statistics_data.find_all('statistic', recursive=False)
+    
+    def get_horse_jockey(self, horse: Tag):
+        jockey_data = horse.find('jockey', recursive=False)
+        return jockey_data['name']
+    
+    def get_last_starts(self, horse: Tag):
+        last_starts_data = horse.find('last_ten_starts', recursive=False)
+        return last_starts_data.text
+    
+    def get_horse_colours(self, horse: Tag):
+        colours_data = horse.find('colours', recursive=False)
+        return colours_data.text
+    
+    def get_horse_colours_image(self, horse: Tag):
+        colours_data = horse.find('colours', recursive=False)
+        return colours_data.text
+    
+    def get_horse_barrier(self, horse: Tag):
+        barrier_data = horse.find('barrier', recursive=False)
+        return barrier_data.text
+
+    def get_horse_trainer(self, horse: Tag):
+        trainer_data = horse.find('trainer', recursive=False)
+        return trainer_data['name']
 
 
 # def get_xml_soup(xml_file):

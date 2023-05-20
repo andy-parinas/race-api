@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 class RaceBase(BaseModel):
     race_id: str
-    race_date: datetime
+    name: str
+    date_time: datetime
     race_number: int
     distance: int
     

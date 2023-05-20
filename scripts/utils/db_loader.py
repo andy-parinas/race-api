@@ -4,9 +4,10 @@ from app import repositories as repo
 from .xml_parser import XmlParser
 
 from app.schemas.meeting import MeetingCreate
-from app.schemas.current_race import CurrentRaceCreate
 from app.schemas.race import RaceCreate
 from app.schemas.horse import HorseCreate
+from app.schemas.horse_race_info import HorseRaceInfoCreate
+from app.schemas.horse_race_stats import HorseRaceStatsCreate
 
 
 
@@ -27,7 +28,7 @@ def load_db(file):
         track_surface=meeting_data['track_surface'],
         location=meeting_data['location'],
         state=meeting_data['state'],
-        meeting_date=datetime.strptime(meeting_data['meeting_date'], "%d/%m/%Y")
+        date=datetime.strptime(meeting_data['meeting_date'], "%d/%m/%Y")
     ))
 
     for race in races:
@@ -38,8 +39,9 @@ def load_db(file):
             RaceCreate(
                 race_id=race['id'],
                 race_number=int(race['number']),
+                name=race['name'],
                 meeting_id=meeting.id,
-                race_date=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p"),
+                date_time=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p"),
                 distance=parser.get_race_distance(race)
             )
         )
@@ -53,6 +55,27 @@ def load_db(file):
                     race_id=race_db.id
                 )
             )
+
+            horse_jockey = parser.get_horse_jockey(horse)
+            horse_trainer = parser.get_horse_trainer(horse)
+            last_starts = parser.get_last_starts(horse)
+            colours = parser.get_colours(horse)
+            colours_image = parser.get_horse_colours_image(horse)
+            barrier = parser.get_horse_barrier(horse)
+
+            repo.horse_race_info.create(db, HorseRaceInfoCreate(
+                horse_id=horse_db.id,
+                race_id=race_db.id,
+                jockey=horse_jockey,
+                trainer=horse_trainer,
+                last_starts=last_starts,
+                colours=colours,
+                colours_pic=colours_image,
+                barrier=barrier
+            ))
+
+
+
             statistics = parser.get_horse_stats(horse)
             for stat in statistics:
                 if stat['type'] in allowed_stat:
@@ -62,8 +85,8 @@ def load_db(file):
                     second = int(stat['seconds'])
                     third = int(stat['thirds'])
 
-                    current_race = repo.current_race.create(
-                            db, CurrentRaceCreate(
+                    horse_race_stats = repo.horse_race_stats.create(
+                            db, HorseRaceStatsCreate(
                                 stat=stat['type'],
                                 total=total,
                                 first=first,
@@ -71,7 +94,15 @@ def load_db(file):
                                 third=third,
                                 horse_id=horse_db.id,
                                 race_id=race_db.id,
-                                meeting_id=meeting.id
                             )
                         )
-                    print(f"{current_race.id}")
+                    print(f"{horse_race_stats.id}")
+
+
+# def test_data(file):
+#     xml_file = file
+#     parser = XmlParser(xml_file)
+#     races = parser.get_races()
+#     for race in races:
+#         horses = parser.get_race_horses(race)
+#         for horse in horses:
