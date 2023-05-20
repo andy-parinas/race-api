@@ -63,7 +63,7 @@ def run_migrations_online() -> None:
     """
 
     configuration = config.get_section(config.config_ini_section)
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}?sslmode=require"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}?sslmode={settings.SSL_MODE}"
     
     configuration['sqlalchemy.url'] = SQLALCHEMY_DATABASE_URI
     connectable = engine_from_config(
