@@ -47,19 +47,24 @@ def load_db(file):
         )
         horses = parser.get_race_horses(race)
         for horse in horses:
-            horse_db = repo.horse.create(
-                db,
-                HorseCreate(
-                    horse_id=horse['id'],
-                    horse_name=horse['name'],
-                    race_id=race_db.id
+
+            horse_db = repo.horse.get_horse_from_horse_id(db, horse['id'])
+
+            if horse_db is None:
+
+                horse_db = repo.horse.create(
+                    db,
+                    HorseCreate(
+                        horse_id=horse['id'],
+                        horse_name=horse['name'],
+                        race_id=race_db.id
+                    )
                 )
-            )
 
             horse_jockey = parser.get_horse_jockey(horse)
             horse_trainer = parser.get_horse_trainer(horse)
             last_starts = parser.get_last_starts(horse)
-            colours = parser.get_colours(horse)
+            colours = parser.get_horse_colours(horse)
             colours_image = parser.get_horse_colours_image(horse)
             barrier = parser.get_horse_barrier(horse)
 
@@ -85,6 +90,12 @@ def load_db(file):
                     second = int(stat['seconds'])
                     third = int(stat['thirds'])
 
+                    win_ratio = 0
+                    if total > 0:
+                        win_ratio = (first + second * 0.5 + third * 0.25) / total
+
+                    print(f"win_ratio = {win_ratio}")
+
                     horse_race_stats = repo.horse_race_stats.create(
                             db, HorseRaceStatsCreate(
                                 stat=stat['type'],
@@ -92,11 +103,12 @@ def load_db(file):
                                 first=first,
                                 second=second,
                                 third=third,
+                                win_ratio=win_ratio,
                                 horse_id=horse_db.id,
                                 race_id=race_db.id,
                             )
                         )
-                    print(f"{horse_race_stats.id}")
+                    print(f"{horse_race_stats.win_ratio}")
 
 
 # def test_data(file):

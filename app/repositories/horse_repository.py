@@ -20,5 +20,8 @@ class HorseRepository:
         horses = db.query(Horse).options(joinedload(Horse.race).joinedload(Race.meeting)).filter(Horse.id.in_(ids)).all()
         return horses
 
+    def get_horse_from_horse_id(self, db: Session, horse_id: str) -> Horse:
+        horse = db.query(Horse).filter(Horse.horse_id == horse_id).first()
+        return horse
 
 horse = HorseRepository()

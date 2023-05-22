@@ -53,6 +53,8 @@ class XmlParser:
     
     def get_last_starts(self, horse: Tag):
         last_starts_data = horse.find('last_ten_starts', recursive=False)
+        if last_starts_data is None:
+            return ""
         return last_starts_data.text
     
     def get_horse_colours(self, horse: Tag):
@@ -60,7 +62,7 @@ class XmlParser:
         return colours_data.text
     
     def get_horse_colours_image(self, horse: Tag):
-        colours_data = horse.find('colours', recursive=False)
+        colours_data = horse.find('horse_colours_image', recursive=False)
         return colours_data.text
     
     def get_horse_barrier(self, horse: Tag):

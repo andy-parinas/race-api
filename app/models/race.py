@@ -13,3 +13,5 @@ class Race(Base):
     meeting_id = Column(Integer, ForeignKey("meeting.id", name="race_meeting_fk"), nullable=False)
     meeting: Meeting = relationship("Meeting", back_populates="races")
     # horses = relationship("Horse", back_populates="race")
+    infos = relationship("HorseRaceInfo", back_populates="race")
+    stats = relationship("HorseRaceStats", back_populates="race")

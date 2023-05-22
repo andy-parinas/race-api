@@ -8,6 +8,7 @@ class HorseRaceStatsBase(BaseModel):
     first: int
     second: int
     third: int
+    win_ratio: float
     horse_id: int
     race_id: int
 

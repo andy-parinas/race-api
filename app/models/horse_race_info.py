@@ -1,8 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey, Integer, Float
 from sqlalchemy.orm import relationship
 from .base_class import Base
-from .race import Race
-from .horse import Horse
+
 
 
 class HorseRaceInfo(Base):
@@ -15,5 +14,5 @@ class HorseRaceInfo(Base):
     jockey = Column(String)
     barrier = Column(Integer, nullable=True)
     last_starts = Column(String)
-    race: Race = relationship("Races", back_populates="infos")
-    horse: Horse = relationship("Horse", back_populates="infos")
+    race = relationship("Race", back_populates="infos")
+    horse = relationship("Horse", back_populates="infos")

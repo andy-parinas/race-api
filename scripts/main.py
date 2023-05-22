@@ -8,11 +8,11 @@ if __name__ == "__main__":
 
     files = [
         "20221119_GOS_FORM_XML_A.xml",
-        "20221119_BAR_FORM_XML_A.xml",
-        "20221119_GCO_FORM_XML_A.xml",
-        "20221119_KEG_FORM_XML_A.xml",
-        "20221119_MPK_FORM_XML_A.xml",
-        "20221119_SUN_FORM_XML_A.xml"
+        # "20221119_BAR_FORM_XML_A.xml",
+        # "20221119_GCO_FORM_XML_A.xml",
+        # "20221119_KEG_FORM_XML_A.xml",
+        # "20221119_MPK_FORM_XML_A.xml",
+        # "20221119_SUN_FORM_XML_A.xml"
     ]
 
     for file in files:

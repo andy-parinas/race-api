@@ -14,5 +14,5 @@ class HorseRaceStats(Base):
     second = Column(Integer)
     third = Column(Integer)
     win_ratio = Column(Float, default=0)
-    race: Race = relationship("Races", back_populates="stats")
+    race: Race = relationship("Race", back_populates="stats")
     horse: Horse = relationship("Horse", back_populates="stats")
