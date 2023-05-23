@@ -7,11 +7,11 @@ load_dotenv()
 
 
 settings_directory = os.path.dirname(os.path.abspath(__file__))
-storage_directory = os.path.abspath(os.path.join(settings_directory, '..', 'storage'))
+storage_directory = os.path.abspath(
+    os.path.join(settings_directory, '..', 'storage'))
 
 
 class Settings:
-   
 
     API_VI: str = "/api/v1"
     JWT_SECRET: str = "DO_NOT_USE_IN_PRODUCTION"
@@ -23,15 +23,16 @@ class Settings:
     DB_NAME = os.getenv("DB_NAME")
     SSL_MODE = os.getenv("SSL_MODE", "disable")
 
-
-
     # SFTP Configuration
 
     SFTP_HOST = os.getenv("SFTP_HOST")
     SFTP_PORT = os.getenv("SFTP_PORT", 22)
-    SFTP_PRIVATE_KEY = os.getenv("SFTP_PRIVATE_KEY", f"{storage_directory}/sftp_key")
+    SFTP_PRIVATE_KEY = os.getenv(
+        "SFTP_PRIVATE_KEY", f"{storage_directory}/sftp_key")
     SFTP_USERNAME = os.getenv("SFTP_USERNAME")
 
+    S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
+    S3_SECRET = os.getenv("S3_SECRET")
 
 
 settings = Settings()

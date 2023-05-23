@@ -1,5 +1,5 @@
 ## Running the Migrations
 
 '''
-alembic revision --autogenerate -m "create core tables"
+alembic revision --autogenerate -m "create file_forms tables"
 '''
