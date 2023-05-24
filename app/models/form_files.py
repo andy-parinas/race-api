@@ -7,3 +7,4 @@ class FormFiles(Base):
     file_name = Column(String, nullable=False)
     is_processed = Column(Boolean, default=0)
     is_uploaded = Column(Boolean, default=0)
+    timestamp = Column(Integer, nullable=False)

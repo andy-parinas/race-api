@@ -5,6 +5,7 @@ class FormFilesBase(BaseModel):
     file_name: str
     is_processed: bool
     is_uploaded: bool
+    timestamp: int
 
 
 class FormFilesCreate(FormFilesBase):

@@ -1,3 +1,4 @@
+from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -5,10 +6,9 @@ from pydantic import BaseModel
 class RaceBase(BaseModel):
     race_id: str
     name: str
-    date_time: datetime
+    date_time: Optional[datetime]
     race_number: int
     distance: int
-    
 
 
 class RaceCreate(RaceBase):
@@ -20,4 +20,3 @@ class RaceInDb(RaceBase):
 
     class Config:
         orm_mode = True
-

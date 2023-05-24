@@ -15,13 +15,17 @@ class FormFilesRepository:
         return FormFilesSchema.from_orm(db_obj)
 
     def get_form_file_from_filename(self, db: Session, filename: str) -> FormFilesSchema:
-        form_file = db.query(FormFiles).filter(FormFiles.id == id).first()
+        form_file = db.query(FormFiles).filter(
+            FormFiles.file_name == filename).first()
+        if not form_file:
+            return None
+
         return FormFilesSchema.from_orm(form_file)
 
     def set_processed(self, db: Session, id: int):
         try:
             db.query(FormFiles).filter(FormFiles.id == id).update(
-                {FormFiles.processed: True})
+                {FormFiles.is_processed: True})
             db.commit()
             return True
         except Exception as e:
@@ -31,7 +35,7 @@ class FormFilesRepository:
     def set_uploaded(self, db: Session, id: int):
         try:
             db.query(FormFiles).filter(FormFiles.id == id).update(
-                {FormFiles.uploaded: True})
+                {FormFiles.is_uploaded: True})
             db.commit()
             return True
         except Exception as e:

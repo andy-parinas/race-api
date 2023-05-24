@@ -10,18 +10,20 @@ from app.schemas.horse_race_info import HorseRaceInfoCreate
 from app.schemas.horse_race_stats import HorseRaceStatsCreate
 
 
-
-def load_db(file):
+def load_db(file, update=False):
+    print("Loading file to DB...")
     allowed_stat = ['all', 'track', 'distance', 'distance_track',
                     'firm', 'good', 'soft', 'heavy', 'synthetic',
                     'first_up', 'second_up', 'current_jockey'
                     ]
+
     xml_file = file
     parser = XmlParser(xml_file)
     races = parser.get_races()
     db = SessionLocal()
     meeting_date = parser.get_meeting_date()
     meeting_data = parser.get_meeting_data()
+
     meeting = repo.meeting.create(db, meeting_in=MeetingCreate(
         track_name=meeting_data['track_name'],
         track_id=meeting_data['track_id'],
@@ -33,7 +35,6 @@ def load_db(file):
 
     for race in races:
         start_time = parser.get_race_start_time(race)
-        date_time = f"{meeting_date} {start_time}"
         race_db = repo.race.create(
             db,
             RaceCreate(
@@ -41,10 +42,12 @@ def load_db(file):
                 race_number=int(race['number']),
                 name=race['name'],
                 meeting_id=meeting.id,
-                date_time=datetime.strptime(date_time, "%d/%m/%Y %I:%M%p"),
-                distance=parser.get_race_distance(race)
+                date_time=datetime.strptime(
+                    f"{meeting_date} {start_time}", "%d/%m/%Y %I:%M%p") if start_time is not None else None,
+                distance=parser.get_race_distance(race),
             )
         )
+
         horses = parser.get_race_horses(race)
         for horse in horses:
 
@@ -76,10 +79,8 @@ def load_db(file):
                 last_starts=last_starts,
                 colours=colours,
                 colours_pic=colours_image,
-                barrier=barrier
+                barrier=barrier if barrier is not None else None
             ))
-
-
 
             statistics = parser.get_horse_stats(horse)
             for stat in statistics:
@@ -92,25 +93,23 @@ def load_db(file):
 
                     win_ratio = 0
                     if total > 0:
-                        win_ratio = (first + second * 0.5 + third * 0.25) / total
-
-                    print(f"win_ratio = {win_ratio}")
+                        win_ratio = (first + second * 0.5 +
+                                     third * 0.25) / total
 
                     horse_race_stats = repo.horse_race_stats.create(
-                            db, HorseRaceStatsCreate(
-                                stat=stat['type'],
-                                total=total,
-                                first=first,
-                                second=second,
-                                third=third,
-                                win_ratio=win_ratio,
-                                horse_id=horse_db.id,
-                                race_id=race_db.id,
-                            )
+                        db, HorseRaceStatsCreate(
+                            stat=stat['type'],
+                            total=total,
+                            first=first,
+                            second=second,
+                            third=third,
+                            win_ratio=win_ratio,
+                            horse_id=horse_db.id,
+                            race_id=race_db.id,
                         )
-                    print(f"{horse_race_stats.win_ratio}")
+                    )
 
-
+    print("File Loaded to DB Successfully.")
 # def test_data(file):
 #     xml_file = file
 #     parser = XmlParser(xml_file)
