@@ -15,18 +15,24 @@ class MeetingRepository:
         db.commit()
         return db_obj
 
-    def get_many(self, 
-        db: Session, *, 
-        skip:int = 0, 
-        limit:int = 0, 
-        state: Optional[str] = None
-    ) -> List[Meeting]:
+    def get_many(self,
+                 db: Session, *,
+                 skip: int = 0,
+                 limit: int = 0,
+                 state: Optional[str] = None
+                 ) -> List[Meeting]:
         query = db.query(Meeting)
 
         if state is not None:
             query = query.filter(Meeting.state == state)
 
         return query.offset(skip).limit(limit).all()
+
+    def get_meeting_by_track_id(self, db: Session, meeting_id: int) -> Optional[Meeting]:
+        return db.query(Meeting).filter(Meeting.id == meeting_id).first()
+
+    def get_meeting_by_date(self, db: Session, date: str) -> Optional[Meeting]:
+        return db.query(Meeting).filter(Meeting.date == date).first()
 
 
 meeting = MeetingRepository()

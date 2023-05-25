@@ -14,8 +14,8 @@ class Race(Base):
     distance = Column(Integer)
     meeting_id = Column(Integer, ForeignKey(
         "meeting.id", name="race_meeting_fk"), nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    # created_at = Column(DateTime, default=datetime.now)
+    # updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     meeting: Meeting = relationship("Meeting", back_populates="races")
     # horses = relationship("Horse", back_populates="race")
     infos = relationship("HorseRaceInfo", back_populates="race")

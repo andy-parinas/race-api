@@ -8,6 +8,7 @@ from app.schemas.race import RaceCreate
 from app.schemas.horse import HorseCreate
 from app.schemas.horse_race_info import HorseRaceInfoCreate
 from app.schemas.horse_race_stats import HorseRaceStatsCreate
+from app.schemas.track import TrackCreate
 
 
 def load_db(file, update=False):
@@ -24,12 +25,16 @@ def load_db(file, update=False):
     meeting_date = parser.get_meeting_date()
     meeting_data = parser.get_meeting_data()
 
-    meeting = repo.meeting.create(db, meeting_in=MeetingCreate(
-        track_name=meeting_data['track_name'],
+    track = repo.track.create(db, track_in=TrackCreate(
+        name=meeting_data['track_name'],
         track_id=meeting_data['track_id'],
-        track_surface=meeting_data['track_surface'],
         location=meeting_data['location'],
         state=meeting_data['state'],
+    ))
+
+    meeting = repo.meeting.create(db, meeting_in=MeetingCreate(
+        track_id=track.id,
+        track_surface=meeting_data['track_surface'],
         date=datetime.strptime(meeting_data['meeting_date'], "%d/%m/%Y")
     ))
 

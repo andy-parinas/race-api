@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 from pathlib import Path
 from sqlalchemy.orm import Session
 from utils.db_loader import load_db
@@ -22,7 +23,7 @@ def load_file_to_db(db: Session, downloaded_file, file: FormFiles):
 
 def upload_processed_file(db: Session, downloaded_file, file: FormFiles):
     try:
-        s3_client.upload_file(downloaded_file, 'form', file.file_name)
+        s3_client.upload_file(downloaded_file, 'forms', file.file_name)
         repo.form_files.set_uploaded(db, file.id)
         print("File Uploaded: ", file.file_name)
         delete_file_from_local_storage(downloaded_file)
@@ -74,26 +75,32 @@ if __name__ == "__main__":
     print("Main Executing")
     path_root = Path(__file__).parents[1]
 
-    files = sftp_client.get_files_in_dir('/mr_form')
+    # files = sftp_client.get_files_in_dir('/mr_form')
     # # print(files)
 
-    # for file in files:
-    #     # parse_file(file)
-    #     print(file.filename)
-    #     print(file.st_mtime)
+    file_list = glob.glob(os.path.join(
+        f"{str(path_root)}/storage/", "*_A.xml"))
+    print(file_list)
 
     db = SessionLocal()
-    for file in files:
+    for file in file_list:
         print(f"Processing file: {file} ")
-        filename = file.filename
-        file_db_exists = repo.form_files.get_form_file_from_filename(
-            db, filename=filename)
-        if not file_db_exists:
-            process_file(db, filename, is_new=True)
-        else:
-            print(f"File in DB already exists: {file_db_exists.filename}")
-            if file.st_mtime > file_db_exists.timestamp:
-                print("Perform update on file...")
-            elif file.st_mtime == file_db_exists.timestamp:
-                process_file(
-                    db, filename, timestamp=file.st_mtime, is_new=False)
+        filename = file.split("/")[-1]
+        if filename.endswith("_A.xml"):
+            load_db(file)
+    # db = SessionLocal()
+    # for file in files:
+    #     print(f"Processing file: {file} ")
+    #     filename = file.filename
+    #     if filename.endswith("_A.xml"):
+    #         file_db_exists = repo.form_files.get_form_file_from_filename(
+    #             db, filename=filename)
+    #         if not file_db_exists:
+    #             process_file(db, filename, is_new=True)
+    #         else:
+    #             print(f"File in DB already exists: {file_db_exists.filename}")
+    #             if file.st_mtime > file_db_exists.timestamp:
+    #                 print("Perform update on file...")
+    #             elif file.st_mtime == file_db_exists.timestamp:
+    #                 process_file(
+    #                     db, filename, timestamp=file.st_mtime, is_new=False)

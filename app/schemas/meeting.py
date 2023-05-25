@@ -1,14 +1,25 @@
+from enum import Enum
 from typing import Sequence, List, Optional
 from datetime import date
 from pydantic import BaseModel
 
+from app.schemas.track import Track
+
+
+class TrackSurface(str, Enum):
+    D = "Dirt"
+    G = "Grass"
+    S = "Sand"
+    Y = "Synthetic"
+    W = "Wood Chip"
+    A = "Grass Hidirt"
+    B = "Grass Hisand"
+    C = "Grass Hiwood Chip"
+
 
 class MeetingBase(BaseModel):
-    track_name: str
-    track_id: str
-    track_surface: str
-    location: str
-    state: str
+    track_id: int
+    track_surface: Optional[str]
     date: date
 
 
@@ -17,19 +28,23 @@ class MeetingQuery(BaseModel):
     page: int = 1
     max_results: int = 10
 
+
 class MeetingCreate(MeetingBase):
     ...
 
 
 class MeetingInDbBase(MeetingBase):
     id: int
+    created_at: date
+    updated_at: date
 
     class Config:
         orm_mode = True
 
 
 class Meeting(MeetingInDbBase):
-    ...
+    track: Track
+
 
 class MeetingListResults(BaseModel):
     results: Sequence[Meeting]
