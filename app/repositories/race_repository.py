@@ -1,5 +1,7 @@
 from typing import List
+from datetime import datetime
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from app.models.race import Race
 from app.schemas.race import RaceCreate
@@ -14,20 +16,46 @@ class RaceRepository:
         db.commit()
         return db_obj
 
-    def get_race_list(self, db: Session, *, 
-        meeting_ids: List[int]|None = None,
-        skip: int = 0,
-        limit: int = 0,
-    ) -> List[Race]:
+    def get_races(self, db: Session, *, meeting_id: int = None, date_filter: str = None, date_time: str = None,
+                  datetime_end: str = None, order_by: str = "date_time",  direction: str = "asc",
+                  skip: int = 0, limit: int = 0, ) -> List[Race]:
 
         query = db.query(Race)
 
-        if meeting_ids:
-            query = query.filter(Race.meeting_id.in_(meeting_ids))
+        if meeting_id:
+            query = query.filter(Race.meeting_id == meeting_id)
 
-        return query.order_by(Race.race_number).offset(skip).limit(limit).all()
+        if date_time:
+            race_datetime = datetime.strptime(date_time, "%Y-%m-%d-%H_%M_%S")
+            eq_filter_mapping = ["eq", "gt", "gteq", "lt", "lteq"]
+            if date_filter in eq_filter_mapping:
+                filter_mapping = {
+                    "gt": Race.date_time > race_datetime,
+                    "gteq": Race.date_time >= race_datetime,
+                    "lt": Race.date_time < race_datetime,
+                    "lteq": Race.date_time <= race_datetime,
+                    "eq": Race.date_time == race_datetime,
+                }
+                query = query.filter(filter_mapping[date_filter])
+            elif date_filter == "bet" and datetime_end:
+                race_datetime_end = datetime.strptime(
+                    datetime_end, "%Y-%m-%d-%H_%M_%S")
+                query = query.filter(
+                    Race.date_time.between(race_datetime, race_datetime_end))
 
-    def get_race_by_id(self, db: Session, *, race_id:int) -> Race:
+        valid_fields = ["id", "race_id",
+                        "date_time", "distance", "race_number"]
+        valid_directions = ["asc", "desc"]
+
+        if order_by in valid_fields and direction in valid_directions:
+            attribute = getattr(Race, order_by)
+            ordering = getattr(attribute, direction)()
+            query = query.order_by(ordering)
+
+        return query.offset(skip).limit(limit).all()
+
+    def get_race_by_id(self, db: Session, *, race_id: int) -> Race:
         return db.query(Race).filter(Race.id == race_id).first()
+
 
 race = RaceRepository()

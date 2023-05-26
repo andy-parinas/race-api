@@ -20,7 +20,8 @@ class MeetingRepository:
     def get_meetings(self, db: Session, *,  skip: int = 0, limit: int = 0,
                      state: Optional[str] = None, date: Optional[str] = None) -> List[Meeting]:
 
-        query = db.query(Meeting).options(joinedload(Meeting.track))
+        query = db.query(Meeting).options(joinedload(
+            Meeting.track)).options(joinedload(Meeting.races))
 
         if state is not None:
             query = query.filter(Meeting.track.has(state=state))
