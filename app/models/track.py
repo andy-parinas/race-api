@@ -11,6 +11,4 @@ class Track(Base):
     name = Column(String)
     location = Column(String)
     state = Column(String)
-    # created_at = Column(DateTime, default=datetime.now)
-    # updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     meetings = relationship("Meeting", back_populates="track")

@@ -1,6 +1,6 @@
 import re
-from typing import Optional
-from fastapi import APIRouter, Depends, status, HTTPException
+from typing import Optional, Annotated
+from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -12,14 +12,22 @@ router = APIRouter()
 
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_races(
-    meeting_id: Optional[int] = None,
-    datetime: Optional[str] = None,
-    datetime_end: Optional[str] = None,
-    date_filter: Optional[str] = None,
-    order_by: Optional[str] = "date_time",
-    direction: Optional[str] = "asc",
-    page: int = 1,
-    max_results: int = 10,
+    meeting_id: Annotated[int | None, Query(
+        description="The Meeting ID")] = None,
+    datetime: Annotated[str | None, Query(
+        description="Date and Time of the Race")] = None,
+    datetime_end: Annotated[str | None, Query(
+        description="Date and Time of the Race when using between")] = None,
+    date_filter: Annotated[str | None, Query(
+        description="Filter use when working with dates (eq, gt, lt, gte, lte, bet)")] = None,
+    order_by: Annotated[str | None, Query(
+        description="Property to order")] = "date_time",
+    direction: Annotated[str | None, Query(
+        description="Direction of ordering")] = "asc",
+    page: Annotated[int | None, Query(
+        description="Page number")] = 1,
+    max_results: Annotated[int | None, Query(
+        description="Max number of results")] = 10,
     db: Session = Depends(get_db)
 ):
     skip = (page - 1) * max_results
@@ -38,6 +46,20 @@ def get_races(
                                 date_filter=date_filter, order_by=order_by, direction=direction, skip=skip, limit=max_results)
 
     return races
+
+
+@router.get("/{item_id}", status_code=status.HTTP_200_OK)
+def get_race(
+    item_id: Annotated[int, Path(description="The Id of the Race to get")],
+    db: Session = Depends(get_db)
+):
+
+    race = repo.race.get_race_by_id(db, race_id=item_id)
+
+    if not race:
+        raise HTTPException(status_code=404, detail="Not found.")
+
+    return race
 
 
 def validate_datetime_param(datetime_param: str) -> str:
