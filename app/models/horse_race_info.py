@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, String, ForeignKey, Integer, DateTime
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from .base_class import Base
 
 
@@ -20,8 +20,10 @@ class HorseRaceInfo(Base):
     jockey = mapped_column(String)
     barrier = mapped_column(Integer, nullable=True)
     last_starts = mapped_column(String)
-    race = relationship("Race", back_populates="infos")
-    horse = relationship("Horse", back_populates="infos")
+    race: Mapped["Race"] = relationship(
+        back_populates="infos", overlaps="horses,races")
+    horse = relationship("Horse", back_populates="infos",
+                         overlaps="horses,races")
     created_at = mapped_column(
         DateTime, default=datetime.now)
     updated_at = mapped_column(

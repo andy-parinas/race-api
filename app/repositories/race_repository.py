@@ -61,36 +61,15 @@ class RaceRepository:
 
     def get_race_by_id(self, db: Session, *, race_id: int) -> Race:
 
-        # race = (
-        #     db.query(
-        #         Race.id,
-        #         Race.race_number,
-        #         Race.date_time,
-        #         Track.name.label("track_name"),
-        #         Meeting.track_surface.label("track_surface"),
-        #         Horse.horse_name.label("horse_name"),
-        #         HorseRaceInfo.colours_pic.label("colours_pic"),
-        #         HorseRaceInfo.trainer.label("trainer"),
-        #         HorseRaceInfo.jockey.label("jockey"),
-        #         HorseRaceStats.stat.label("stat"),
-        #         HorseRaceStats.total.label("total"),
-        #         HorseRaceStats.first.label("first"),
-        #         HorseRaceStats.second.label("second"),
-        #         HorseRaceStats.third.label("third"), )
-        #     .join(Meeting, Meeting.id == Race.meeting_id)
-        #     .join(Track, Track.id == Meeting.track_id)
-        #     .join(HorseRaceInfo, HorseRaceInfo.race_id == Race.id)
-        #     .join(HorseRaceStats, HorseRaceStats.race_id == Race.id)
-        #     .join(Horse, Horse.id == HorseRaceInfo.horse_id)
-        #     .filter(Race.id == race_id).all()
-        # )
-
         query = (
             db.query(Race)
             .options(
                 joinedload(Race.meeting).joinedload(Meeting.track),
-                joinedload(Race.stats),
-                joinedload(Race.infos).joinedload(HorseRaceInfo.horse)
+                # joinedload(Race.stats),
+                joinedload(Race.horses).joinedload(
+                    Horse.infos),
+                joinedload(Race.horses).joinedload(Horse.stats)
+
             )
         )
 

@@ -23,7 +23,7 @@ class HorseRaceStats(Base):
     second = mapped_column(Integer)
     third = mapped_column(Integer)
     win_ratio = mapped_column(Float, default=0)
-    race = relationship("Race", back_populates="stats")
+    # race = relationship("Race", back_populates="stats")
     horse = relationship("Horse", back_populates="stats")
     created_at = mapped_column(
         DateTime, default=datetime.now)
