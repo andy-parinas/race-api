@@ -1,20 +1,27 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column
 from .base_class import Base
 from .meting import Meeting
 
 
 class Race(Base):
-    id = Column(Integer, primary_key=True, index=True)
-    race_id = Column(String)
-    name = Column(String)
-    date_time = Column(DateTime, nullable=True)
-    race_number = Column(Integer)
-    distance = Column(Integer)
-    meeting_id = Column(Integer, ForeignKey(
+
+    __tablename__ = "race"
+
+    id = mapped_column(Integer, primary_key=True, index=True)
+    race_id = mapped_column(String)
+    name = mapped_column(String)
+    date_time = mapped_column(DateTime, nullable=True)
+    race_number = mapped_column(Integer)
+    distance = mapped_column(Integer)
+    meeting_id = mapped_column(Integer, ForeignKey(
         "meeting.id", name="race_meeting_fk"), nullable=False)
-    meeting: Meeting = relationship("Meeting", back_populates="races")
+    created_at = mapped_column(
+        DateTime, default=datetime.now)
+    updated_at = mapped_column(
+        DateTime, default=datetime.now, onupdate=datetime.now)
+    meeting = relationship("Meeting", back_populates="races")
     infos = relationship("HorseRaceInfo", back_populates="race")
     stats = relationship("HorseRaceStats", back_populates="race")
     # horses = relationship()
