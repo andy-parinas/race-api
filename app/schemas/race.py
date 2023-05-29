@@ -2,6 +2,8 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.schemas.meeting import Meeting
+
 
 class RaceBase(BaseModel):
     race_id: str
@@ -17,6 +19,16 @@ class RaceCreate(RaceBase):
 
 class RaceInDb(RaceBase):
     id: int
+    # created_at: datetime
+    # updated_at: datetime
 
     class Config:
         orm_mode = True
+
+
+class Race(RaceInDb):
+    ...
+
+
+class RaceWithMeeting(Race):
+    meeting: Meeting

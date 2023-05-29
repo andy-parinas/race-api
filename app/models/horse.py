@@ -22,3 +22,8 @@ class Horse(Base):
                                                          primaryjoin="and_(HorseRaceStats.horse_id == Horse.id, Race.id == HorseRaceStats.race_id )")
     races: Mapped[List["Race"]] = relationship(
         secondary="horseraceinfo", back_populates="horses", overlaps="infos")
+
+    #  infos: Mapped[List["HorseRaceInfo"]] = relationship(back_populates="horse",
+    #                                                     primaryjoin="and_(HorseRaceInfo.horse_id == Horse.id, Race.id == HorseRaceInfo.race_id )")
+    # stats: Mapped[List["HorseRaceStats"]] = relationship(back_populates="horse",
+    #                                                      primaryjoin="and_(HorseRaceStats.horse_id == Horse.id, Race.id == HorseRaceStats.race_id )")

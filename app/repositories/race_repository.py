@@ -73,7 +73,9 @@ class RaceRepository:
             )
         )
 
-        race = query.filter(Race.id == race_id).first()
+        query = query.filter(Race.id == race_id)
+
+        race = query.first()
 
         return race
 

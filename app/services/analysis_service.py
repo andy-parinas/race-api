@@ -18,14 +18,12 @@ class AnalysisBase:
         self.preference_type = preference_type
         self.preferences_count = len(self.preferences)
 
-    
     def get_preference_weight(self):
         if self.preference_type == PreferenceType.balance:
             return self.compute_balance_value(self.preferences)
         if self.preference_type == PreferenceType.weighted:
             return self.compute_weighted_value(self.preferences)
 
-    
     def compute_weighted_value(self, preferences):
         print(preferences)
         count = len(preferences)
@@ -37,7 +35,6 @@ class AnalysisBase:
             result.append((pref, weight/sum_of_weight))
 
         return result
-        
 
     def compute_balance_value(self, preferences):
         result = []
@@ -45,7 +42,6 @@ class AnalysisBase:
             result.append((pref, 1/len(preferences)))
 
         return result
-
 
 
 class BayseAnalysis(AnalysisBase):
@@ -57,32 +53,33 @@ class BayseAnalysis(AnalysisBase):
         preferences = self.get_preference_weight()
         for pref in preferences:
             s = data[pref[0]] * pref[1]
-            likelihood = likelihood.add(s, fill_value=0) 
+            likelihood = likelihood.add(s, fill_value=0)
 
         return likelihood
 
     def transform_dataframe(self):
-        data = self.df.pivot_table(index='horse_id', columns='stat', values='win_ratio')
+        data = self.df.pivot_table(
+            index='horse_id', columns='stat', values='win_ratio')
         return data
 
     def get_probability(self, data: DataFrame, likelihood: Series):
-        data = data.merge(pd.DataFrame(likelihood.rename('likelihood')), left_index=True, right_index=True)
+        data = data.merge(pd.DataFrame(likelihood.rename(
+            'likelihood')), left_index=True, right_index=True)
 
         data['prior'] = data['all']
         if (data['prior'] == 0).all():
             data['unnormalized_posterior'] = data['likelihood']
         else:
-            data["unnormalized_posterior"] =  data['prior'] * data['likelihood']
+            data["unnormalized_posterior"] = data['prior'] * data['likelihood']
 
         normalization_factor = data["unnormalized_posterior"].sum()
-        
+
         if normalization_factor == 0:
             data["posterior_probability"] = 0
         else:
-            data["posterior_probability"] = round(data["unnormalized_posterior"] / normalization_factor, 2)
+            data["posterior_probability"] = round(
+                data["unnormalized_posterior"] / normalization_factor, 2)
 
-        data = data.sort_values(['posterior_probability'], ascending= [False])
+        data = data.sort_values(['posterior_probability'], ascending=[False])
 
         return data.head(5)['posterior_probability'].to_dict()
-
-    

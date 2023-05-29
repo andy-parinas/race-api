@@ -48,13 +48,17 @@ def get_races(
     return races
 
 
-@router.get("/{item_id}", status_code=status.HTTP_200_OK)
+@router.get("/{race_id}", status_code=status.HTTP_200_OK)
 def get_race(
-    item_id: Annotated[int, Path(description="The Id of the Race to get")],
+    race_id: Annotated[int, Path(description="The Id of the Race to get")],
+    horse_id: Annotated[int | None, Query(description="Horse Id")] = None,
     db: Session = Depends(get_db)
 ):
-
-    race = repo.race.get_race_by_id(db, race_id=item_id)
+    if not horse_id:
+        race = repo.race.get_race_by_id(db, race_id=race_id)
+    else:
+        race = repo.horse_race_info.get_horse_race_info(
+            db, race_id=race_id, horse_id=horse_id)
 
     if not race:
         raise HTTPException(status_code=404, detail="Not found.")

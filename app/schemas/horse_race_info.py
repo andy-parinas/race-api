@@ -2,6 +2,10 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.schemas.race import Race
+from app.schemas.horse import Horse, HorseWithStats
+from app.schemas.horse_race_stats import HorseRaceStat
+
 
 class HorseRaceInfoBase(BaseModel):
     colours: str
@@ -20,6 +24,8 @@ class HorseRaceInfoCreate(HorseRaceInfoBase):
 
 class HorseRaceInfoInDb(HorseRaceInfoBase):
     id: int
+    # created_at: datetime
+    # updated_at: datetime
 
     class Config:
         orm_mode = True
@@ -27,3 +33,12 @@ class HorseRaceInfoInDb(HorseRaceInfoBase):
 
 class HorseRaceInfo(HorseRaceInfoInDb):
     ...
+
+
+class HorseRaceInfoDetails(BaseModel):
+    id: int
+    race_id: int
+    date_time: datetime
+
+    class Config:
+        orm_mode = True

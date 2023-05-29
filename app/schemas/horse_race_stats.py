@@ -12,16 +12,23 @@ class HorseRaceStatsBase(BaseModel):
     horse_id: int
     race_id: int
 
+
 class HorseRaceStatsCreate(HorseRaceStatsBase):
     ...
 
+
 class HorseRaceStatsInDb(HorseRaceStatsBase):
     id: int
+    # created_at: datetime
+    # updated_at: datetime
 
     class Config:
         orm_mode = True
 
+
 class HorseRaceStat(HorseRaceStatsInDb):
     ...
 
-    
+
+class HorseRaceStatsList(BaseModel):
+    ...

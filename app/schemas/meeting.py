@@ -35,8 +35,8 @@ class MeetingCreate(MeetingBase):
 
 class MeetingInDbBase(MeetingBase):
     id: int
-    created_at: date
-    updated_at: date
+    # created_at: date
+    # updated_at: date
 
     class Config:
         orm_mode = True
