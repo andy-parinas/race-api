@@ -33,6 +33,15 @@ class Settings:
 
     S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
     S3_SECRET = os.getenv("S3_SECRET")
+    S3_REGION = os.getenv("S3_REGION")
+
+    FORM_BUCKET = os.getenv("FORM_BUCKET")
+    IMAGE_BUCKET = os.getenv("IMAGE_BUCKET")
+
+    IMAGE_FOLDER = os.getenv("IMAGE_FOLDER")
+    FORM_FOLDER = os.getenv("FORM_FOLDER")
+
+    IMAGE_URL = os.getenv("IMAGE_URL")
 
 
 settings = Settings()

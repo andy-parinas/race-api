@@ -5,12 +5,12 @@ from app.settings import settings
 
 class S3Client:
 
-    def __init__(self) -> None:
+    def __init__(self, region, endpoint) -> None:
         session = boto3.session.Session()
         self.client = session.client(
             's3',
-            region_name='syd1',
-            endpoint_url='https://mi4orm-form-data.syd1.digitaloceanspaces.com',
+            region_name=region,
+            endpoint_url=endpoint,
             aws_access_key_id=settings.S3_ACCESS_KEY,
             aws_secret_access_key=settings.S3_SECRET
         )
@@ -26,5 +26,22 @@ class S3Client:
             print(e)
             return False
 
+    def upload_image(self, object_data, bucket, object_name):
+        content_type = 'image/jpeg'
+        try:
+            response = self.client.put_object(
+                Body=object_data, Bucket=bucket, Key=object_name, ContentType=content_type)
 
-s3_client = S3Client()
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    def make_object_public(self, bucket, object_name):
+        self.client.put_object_acl(
+            ACL='public-read',
+            Bucket=bucket,
+            Key=object_name
+        )
+
+# s3_client = S3Client()

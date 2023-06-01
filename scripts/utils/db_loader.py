@@ -2,6 +2,8 @@ from datetime import datetime, date
 from app.db.session import SessionLocal
 from app import repositories as repo
 from .xml_parser import XmlParser
+from .image_download import image_download
+from .s3_client import S3Client
 
 from app.schemas.meeting import MeetingCreate
 from app.schemas.race import RaceCreate
@@ -9,6 +11,7 @@ from app.schemas.horse import HorseCreate
 from app.schemas.horse_race_info import HorseRaceInfoCreate
 from app.schemas.horse_race_stats import HorseRaceStatsCreate
 from app.schemas.track import TrackCreate
+from app.settings import settings
 
 
 def load_db(file, update=False):
@@ -17,6 +20,8 @@ def load_db(file, update=False):
                     'firm', 'good', 'soft', 'heavy', 'synthetic',
                     'first_up', 'second_up', 'current_jockey'
                     ]
+
+    s3_client = S3Client(settings.S3_REGION, settings.IMAGE_BUCKET)
 
     xml_file = file
     parser = XmlParser(xml_file)
@@ -73,8 +78,19 @@ def load_db(file, update=False):
             horse_trainer = parser.get_horse_trainer(horse)
             last_starts = parser.get_last_starts(horse)
             colours = parser.get_horse_colours(horse)
-            colours_image = parser.get_horse_colours_image(horse)
+            colours_image_url = parser.get_horse_colours_image(horse)
             barrier = parser.get_horse_barrier(horse)
+
+            image_data, filename = image_download(colours_image_url)
+
+            colours_image = ""
+            if image_data and filename:
+                uploaded = s3_client.upload_image(
+                    image_data, settings.IMAGE_FOLDER, filename)
+                if uploaded:
+                    colours_image = f"{settings.IMAGE_URL}/{filename}"
+                    s3_client.make_object_public(
+                        settings.IMAGE_FOLDER, filename)
 
             repo.horse_race_info.create(db, HorseRaceInfoCreate(
                 horse_id=horse_db.id,
