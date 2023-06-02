@@ -15,6 +15,10 @@ class HorseCreate(HorseBase):
     ...
 
 
+class HorseData(HorseBase):
+    ...
+
+
 class HorseInDbBase(HorseBase):
     id: int
     # created_at: datetime

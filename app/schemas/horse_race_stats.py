@@ -1,20 +1,31 @@
+from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class HorseRaceStatsBase(BaseModel):
+    stat: Optional[str]
+    total: Optional[int]
+    first: Optional[int]
+    second: Optional[int]
+    third: Optional[int]
+    win_ratio: Optional[float]
+    horse_id: Optional[int]
+    race_id: Optional[int]
+
+
+class HorseRaceStatsData(HorseRaceStatsBase):
     stat: str
     total: int
     first: int
     second: int
     third: int
-    win_ratio: float
+    win_ratio: Optional[float]
+
+
+class HorseRaceStatsCreate(HorseRaceStatsData):
     horse_id: int
     race_id: int
-
-
-class HorseRaceStatsCreate(HorseRaceStatsBase):
-    ...
 
 
 class HorseRaceStatsInDb(HorseRaceStatsBase):

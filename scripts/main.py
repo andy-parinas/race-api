@@ -13,6 +13,9 @@ from app.settings import settings
 from utils.image_download import image_download
 
 
+path_root = Path(__file__).parents[1]
+
+
 def load_file_to_db(db: Session, downloaded_file, file: FormFiles):
     try:
         load_db(downloaded_file)
@@ -21,6 +24,7 @@ def load_file_to_db(db: Session, downloaded_file, file: FormFiles):
 
     except Exception as e:
         print(f"error processing file: {file.file_name}\n")
+        print(e)
 
 
 def upload_processed_file(db: Session, downloaded_file, file: FormFiles):
@@ -34,6 +38,7 @@ def upload_processed_file(db: Session, downloaded_file, file: FormFiles):
 
     except Exception as e:
         print(f"error uploading file: {file.file_name}\n")
+        print(e)
 
 
 def delete_file_from_local_storage(file_path: str):
@@ -75,22 +80,27 @@ def process_file(db: Session, file: str, timestamp: int, is_new: bool = False):
             upload_processed_file(db, downloaded_file, file_in_db)
 
 
+def update_file(db: Session, file: str, timestamp: int):
+    # check if file exists in local storage
+    file_path = f"{str(path_root)}/storage/{file}"
+
+    if os.path.exists(file_path):
+        delete_file_from_local_storage(file_path)
+
+    downloaded_file = sftp_client.download_file(
+        '/mr_form', file, f"{str(path_root)}/storage")
+
+    try:
+        load_db(downloaded_file, update=True)
+        repo.form_files.set_processed(db, file.id)
+        print("File Processed: ", file.file_name)
+
+    except Exception as e:
+        print(f"error processing file: {file.file_name}\n")
+
+
 if __name__ == "__main__":
     print("Main Executing")
-    path_root = Path(__file__).parents[1]
-
-    # image = image_download(
-    #     "https://silks.medialityracing.com.au/images/jpg/2023_05_25/gosford/1/1_front.jpg")
-
-    # print(type(image))
-
-    # s3_client = S3Client(settings.S3_REGION, settings.IMAGE_BUCKET)
-    # uploaded = s3_client.upload_object(
-    #     image, settings.IMAGE_FOLDER, "1_front.jpg")
-
-    # file_list = glob.glob(os.path.join(
-    #     f"{str(path_root)}/storage/", "*_A.xml"))
-    # print(file_list)
 
     # db = SessionLocal()
     # for file in file_list:
@@ -99,15 +109,11 @@ if __name__ == "__main__":
     #     if filename.endswith("_A.xml"):
     #         load_db(file)
 
-    # files = sftp_client.get_files_in_dir('/mr_form')
-    # # print(files)
-    # for file in files:
-
 
 ### WORKING #####
 
     files = sftp_client.get_files_in_dir('/mr_form')
-    # print(files)
+    print(files)
 
     db = SessionLocal()
     for file in files:

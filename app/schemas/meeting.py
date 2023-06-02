@@ -33,6 +33,14 @@ class MeetingCreate(MeetingBase):
     ...
 
 
+class MeetingUpdate(MeetingBase):
+    ...
+
+
+class MeetingData(MeetingBase):
+    ...
+
+
 class MeetingInDbBase(MeetingBase):
     id: int
     # created_at: date
@@ -50,5 +58,5 @@ class MeetingListResults(BaseModel):
     results: Sequence[Meeting]
 
 
-class MeetingData(BaseModel):
-    meeting_ids: List[int]
+# class MeetingData(BaseModel):
+#     meeting_ids: List[int]

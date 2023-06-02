@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import and_
+from sqlalchemy import and_, select, update
 
 from app.models.race import Race
 from app.models.meting import Meeting
@@ -9,7 +9,7 @@ from app.models.track import Track
 from app.models.horse import Horse
 from app.models.horse_race_info import HorseRaceInfo
 from app.models.horse_race_stats import HorseRaceStats
-from app.schemas.race import RaceCreate
+from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema
 
 
 class RaceRepository:
@@ -78,6 +78,41 @@ class RaceRepository:
         race = query.first()
 
         return race
+
+    def get_race(self, db: Session, *, race_id: int = None, date_time: str = None, race_number: int = None, meeting_id: int = None):
+
+        stmt = select(Race)
+
+        if race_id:
+            stmt = stmt.where(Race.race_id == race_id)
+
+        if date_time:
+            race_date_time = datetime.strptime(date_time, "%d/%m/%Y %I:%M%p")
+            stmt = stmt.where(Race.date_time == race_date_time)
+
+        if race_number:
+            stmt = stmt.where(Race.race_number == race_number)
+
+        if meeting_id:
+            stmt = stmt.where(Race.meeting_id == meeting_id)
+
+        race = db.scalars(stmt).first()
+
+        if not race:
+            return None
+
+        return RaceSchema.from_orm(race)
+
+    def update_race(self, db: Session, id: int, race_data: RaceData):
+        stmt = update(Race).where(Race.id == id).values(
+            race_id=race_data.race_id,
+            name=race_data.name,
+            date_time=race_data.date_time,
+            distance=race_data.distance
+        )
+
+        db.execute(stmt)
+        db.commit()
 
 
 race = RaceRepository()

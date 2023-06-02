@@ -11,10 +11,15 @@ class RaceBase(BaseModel):
     date_time: Optional[datetime]
     race_number: int
     distance: int
+    meeting_id: int
+
+
+class RaceData(RaceBase):
+    ...
 
 
 class RaceCreate(RaceBase):
-    meeting_id: int
+    ...
 
 
 class RaceInDb(RaceBase):

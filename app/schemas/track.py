@@ -14,6 +14,14 @@ class TrackCreate(TrackBase):
     ...
 
 
+class TrackUpdate(TrackBase):
+    ...
+
+
+class TrackData(TrackBase):
+    ...
+
+
 class TrackInDb(TrackBase):
     id: int
     # created_at: datetime

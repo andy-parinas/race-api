@@ -22,6 +22,10 @@ class HorseRaceInfoCreate(HorseRaceInfoBase):
     ...
 
 
+class HorseRaceInfoData(HorseRaceInfoBase):
+    ...
+
+
 class HorseRaceInfoInDb(HorseRaceInfoBase):
     id: int
     # created_at: datetime
