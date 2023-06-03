@@ -4,21 +4,24 @@ from pydantic import BaseModel
 
 
 class TrackBase(BaseModel):
-    track_id: str
+    track_id: Optional[int]
+    name: Optional[str]
+    location: Optional[str]
+    state: Optional[str]
+
+
+class TrackData(TrackBase):
+    ...
+
+
+class TrackCreate(TrackData):
+    track_id: int
     name: str
     location: str
     state: str
 
 
-class TrackCreate(TrackBase):
-    ...
-
-
-class TrackUpdate(TrackBase):
-    ...
-
-
-class TrackData(TrackBase):
+class TrackUpdate(TrackData):
     ...
 
 

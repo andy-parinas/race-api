@@ -8,7 +8,7 @@ from app.models.track import Track
 
 class TrackRepository:
 
-    def create(self, db: Session, track_in: TrackData) -> TrackSchema:
+    def create(self, db: Session, track_in: TrackCreate) -> TrackSchema:
         track_obj = track_in.dict()
         db_obj = Track(**track_obj)
 
@@ -32,14 +32,16 @@ class TrackRepository:
     def update_track(self, db: Session, id: int, track_data: TrackData):
         stmt = (update(Track)
                 .where(Track.id == id)
+                .returning(Track)
                 .values(track_id=track_data.track_id,
                         name=track_data.name,
                         location=track_data.location,
                         state=track_data.state)
                 )
 
-        db.execute(stmt)
-        db.commit()
+        track = db.scalars(stmt).first()
+
+        return TrackSchema.from_orm(track)
 
 
 track = TrackRepository()

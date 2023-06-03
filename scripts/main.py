@@ -113,7 +113,7 @@ if __name__ == "__main__":
 ### WORKING #####
 
     files = sftp_client.get_files_in_dir('/mr_form')
-    print(files)
+    # print(files)
 
     db = SessionLocal()
     for file in files:
