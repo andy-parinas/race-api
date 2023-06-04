@@ -14,12 +14,13 @@ from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema
 
 class RaceRepository:
 
-    def create(self, db: Session, race_in: RaceCreate) -> Race:
+    def create(self, db: Session, race_in: RaceCreate) -> RaceSchema:
         race_obj = race_in.dict()
         db_obj = Race(**race_obj)
         db.add(db_obj)
         db.commit()
-        return db_obj
+
+        return RaceSchema.from_orm(db_obj)
 
     def get_races(self, db: Session, *, meeting_id: int = None, date_filter: str = None, date_time: str = None,
                   datetime_end: str = None, order_by: str = "date_time",  direction: str = "asc",
@@ -103,16 +104,17 @@ class RaceRepository:
 
         return RaceSchema.from_orm(race)
 
-    def update_race(self, db: Session, id: int, race_data: RaceData):
-        stmt = update(Race).where(Race.id == id).values(
+    def update_race(self, db: Session, id: int, race_data: RaceData) -> RaceSchema:
+        stmt = update(Race).where(Race.id == id).returning(Race).values(
             race_id=race_data.race_id,
             name=race_data.name,
             date_time=race_data.date_time,
             distance=race_data.distance
         )
 
-        db.execute(stmt)
-        db.commit()
+        race = db.scalars(stmt).first()
+
+        return RaceSchema.from_orm(race)
 
 
 race = RaceRepository()

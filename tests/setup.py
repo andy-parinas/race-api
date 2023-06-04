@@ -7,6 +7,7 @@ from app.models import Base
 from app.models.track import Track
 from app.models.meeting import Meeting
 from app.models.horse import Horse
+from app.models.race import Race
 
 from app.main import app
 from app.db.session import get_db
@@ -55,6 +56,25 @@ def meeting_data(test_db: Session, track_data):
     )
 
     yield meetings.scalars().first()
+
+
+@pytest.fixture(scope="module")
+def race_data(test_db: Session, meeting_data: Meeting):
+
+    races = test_db.execute(
+        insert(Race).returning(Race), [
+            {
+                "race_id": "12345",
+                "name": "Race 12345",
+                "date_time": datetime.strptime("31/01/2023 12:30pm", "%d/%m/%Y %I:%M%p"),
+                "race_number": 1,
+                "distance": 1500,
+                "meeting_id": meeting_data.id
+            }
+        ]
+    )
+
+    yield races.scalars().first()
 
 
 @pytest.fixture(scope="module")
