@@ -1,8 +1,11 @@
 import pytest
-from sqlalchemy import create_engine
+from datetime import datetime
+from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import Session, sessionmaker
 from fastapi.testclient import TestClient
 from app.models import Base
+from app.models.track import Track
+from app.models.meting import Meeting
 
 from app.main import app
 from app.db.session import get_db
@@ -25,3 +28,29 @@ def test_client():
     app.dependency_overrides[get_db] = test_db
     client = TestClient(app=app)
     yield client
+
+
+@pytest.fixture(scope="module")
+def track_data(test_db: Session):
+
+    tracks = test_db.execute(
+        insert(Track).returning(Track), [
+            {"track_id": 100, "name": "Track Name",
+                "location": "L", "state": "QLD"}
+        ]
+    )
+
+    yield tracks.scalars().first()
+
+
+@pytest.fixture(scope="module")
+def meeting_data(test_db: Session, track_data):
+
+    meetings = test_db.execute(
+        insert(Meeting).returning(Meeting), [
+            {"track_id": track_data.id, "track_surface": "G",
+                "date": datetime.strptime("2023-01-01", "%Y-%m-%d")}
+        ]
+    )
+
+    yield meetings.scalars().first()

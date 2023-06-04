@@ -38,9 +38,9 @@ class MeetingRepository:
             Meeting.track.id == track_id, Meeting.date == date)
         return query.first()
 
-    def get_meeting(self, db: Session, track_id, date: datetime):
+    def get_meeting(self, db: Session, track_id, date: str):
         stmt = select(Meeting).where(Meeting.track_id ==
-                                     track_id, Meeting.date == date)
+                                     track_id).where(Meeting.date == date)
 
         meeting = db.scalars(stmt).first()
 
