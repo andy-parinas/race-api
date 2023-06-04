@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from .base_class import Base
-from .meting import Meeting
+from .meeting import Meeting
 
 
 class Race(Base):

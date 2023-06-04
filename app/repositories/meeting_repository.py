@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, update
 
-from app.models.meting import Meeting
+from app.models.meeting import Meeting
 from app.models.track import Track
 from app.schemas.meeting import MeetingCreate, MeetingData, Meeting as MeetingSchema
 
@@ -50,13 +50,14 @@ class MeetingRepository:
         return MeetingSchema.from_orm(meeting)
 
     def update_meeting(self, db: Session, id: int, meeting_data: MeetingData):
-        stmt = (update(Meeting)
+        stmt = (update(Meeting).returning(Meeting)
                 .where(Meeting.id == id)
                 .values(track_id=meeting_data.track_id, track_surface=meeting_data.track_surface, date=meeting_data.date)
                 )
 
-        db.execute(stmt)
-        db.commit()
+        meeting = db.scalars(stmt).first()
+
+        return MeetingSchema.from_orm(meeting)
 
 
 meeting = MeetingRepository()

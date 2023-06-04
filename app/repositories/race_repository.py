@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, select, update
 
 from app.models.race import Race
-from app.models.meting import Meeting
+from app.models.meeting import Meeting
 from app.models.track import Track
 from app.models.horse import Horse
 from app.models.horse_race_info import HorseRaceInfo

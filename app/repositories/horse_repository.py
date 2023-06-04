@@ -1,5 +1,6 @@
 from typing import List
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select, update
 
 from app.models.horse import Horse
 from app.models.race import Race
@@ -22,8 +23,25 @@ class HorseRepository:
         return horses
 
     def get_horse_from_horse_id(self, db: Session, horse_id: str) -> Horse:
-        horse = db.query(Horse).filter(Horse.horse_id == horse_id).first()
-        return horse
+
+        stmt = select(Horse).where(Horse.horse_id == horse_id)
+
+        horse = db.scalars(stmt).first()
+
+        if not horse:
+            return None
+
+        return HorseSchema.from_orm(horse)
+
+    def update_horse(self, db: Session, id: int, horse_data: HorseData):
+        stmt = (update(Horse).returning(Horse)
+                .where(Horse.id == id)
+                .values(horse_id=horse_data.horse_id, horse_name=horse_data.horse_name)
+                )
+
+        horse = db.scalars(stmt).first()
+
+        return HorseSchema.from_orm(horse)
 
 
 horse = HorseRepository()

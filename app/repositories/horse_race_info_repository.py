@@ -5,7 +5,7 @@ from app.models.horse_race_info import HorseRaceInfo
 from app.models.horse_race_stats import HorseRaceStats
 from app.models.horse import Horse
 from app.models.race import Race
-from app.models.meting import Meeting
+from app.models.meeting import Meeting
 from app.schemas.horse_race_info import HorseRaceInfoCreate, HorseRaceInfoData, HorseRaceInfo as HorseRaceInfoSchema
 from app.schemas.race import Race as RaceSchema, RaceWithMeeting
 from app.schemas.horse import Horse as HorseSchema, HorseWithStats

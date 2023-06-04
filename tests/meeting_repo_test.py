@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app import repositories as repo
 from app.schemas.meeting import MeetingData, Meeting
 
+from app import models
+
 from .setup import test_db, track_data, meeting_data
 
 
@@ -30,5 +32,15 @@ def test_can_get_meeting(test_db, meeting_data):
     assert isinstance(meeting, Meeting)
 
 
-def test_can_update_meeting():
-    pass
+def test_can_update_meeting(test_db, meeting_data: models.Meeting):
+
+    updated_meeting = repo.meeting.update_meeting(db=test_db, id=meeting_data.id, meeting_data=MeetingData(
+        track_id=meeting_data.track_id,
+        track_surface="U",
+        date=datetime.strptime("2023-12-31", "%Y-%m-%d")
+    ))
+
+    assert updated_meeting is not None
+    assert isinstance(updated_meeting, Meeting)
+    assert updated_meeting.track_surface == "U"
+    assert updated_meeting.date.strftime("%Y-%m-%d") == "2023-12-31"
