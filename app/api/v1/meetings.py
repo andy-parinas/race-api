@@ -1,5 +1,5 @@
-from typing import Optional
-from fastapi import APIRouter, status, Depends
+from typing import Optional, Annotated
+from fastapi import APIRouter, status, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.schemas.meeting import MeetingListResults, MeetingQuery
@@ -12,11 +12,21 @@ router = APIRouter()
 
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_meetings(
-    state: Optional[str] = None,
-    date: Optional[str] = None,
+    state: Annotated[str | None, Query(
+        description="State where meeting is held")] = None,
+    date: Annotated[str | None, Query(
+        description="Meeting Date. example: 2023-12-31")] = None,
+    page: Annotated[int | None, Query(
+        description="Page number")] = 1,
+    max_results: Annotated[int | None, Query(
+        description="Max number of results")] = 10,
     db: Session = Depends(get_db)
 ):
-    meetings = repo.meeting.get_meetings(db, date=date, state=state, limit=10)
+
+    skip = (page - 1) * max_results
+
+    meetings = repo.meeting.get_meetings(
+        db, date=date, state=state, limit=max_results, skip=skip)
     return meetings
 
 
