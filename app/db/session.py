@@ -7,7 +7,7 @@ SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWOR
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
 
-SessionLocal = sessionmaker(autocommit=True, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(bind=engine)
 
 
 def get_db():
@@ -15,4 +15,5 @@ def get_db():
     try:
         yield db
     finally:
+        db.commit()
         db.close()

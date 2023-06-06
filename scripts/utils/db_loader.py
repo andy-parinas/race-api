@@ -104,10 +104,12 @@ def process_track_data(db: Session, track_data: TrackData):
         db, track_id=track_data.track_id, track_name=track_data.name)
 
     if track:
+        print(f"updating track {track.id}")
         repo.track.update_track(db, track.id, track_data=track_data)
 
     else:
         track = repo.track.create(db, track_in=track_data)
+        print(f"created new track {track.id}")
 
     return track
 
@@ -117,11 +119,13 @@ def process_meeting_data(db: Session, meeting_data: MeetingData):
         db, track_id=meeting_data.track_id, date=meeting_data.date)
 
     if meeting:
+        print(f"updating meeting {meeting.id}")
         repo.meeting.update_meeting(
             db, meeting.id, meeting_data=meeting_data)
 
     elif not meeting:
         meeting = repo.meeting.create(db, meeting_in=meeting_data)
+        print(f"created new meeting {meeting.id}")
 
     return meeting
 
@@ -131,10 +135,12 @@ def process_race_data(db: Session, race_data: RaceData):
         db, race_id=race_data.race_id, meeting_id=race_data.meeting_id)
 
     if race_db:
+        print(f"updating race {race_db.id}")
         repo.race.update_race(db, id=race_db.id, race_data=race_data)
 
     else:
         race_db = repo.race.create(db, race_in=race_data)
+        print(f"created new race {race_db.id}")
 
     return race_db
 
@@ -145,6 +151,7 @@ def process_horse_data(db: Session, horse_data: HorseData):
 
     if horse_db is None:
         horse_db = repo.horse.create(db, horse_in=horse_data)
+        print(f"created new horse {horse_db.id}")
 
     return horse_db
 
@@ -155,10 +162,12 @@ def process_horse_race_info_data(db: Session, info_data: HorseRaceInfoData):
         db, race_id=info_data.race_id, horse_id=info_data.horse_id)
 
     if info:
+        print(f"updating info {info.id}")
         repo.horse_race_info.update_horse_race_info(db, info.id, info_data)
 
     else:
         info = repo.horse_race_info.create(db, info_data)
+        print(f"created new info {info.id}")
 
     return info
 
@@ -169,9 +178,11 @@ def process_horse_race_stats_data(db: Session, stats_data: HorseRaceStatsData):
         db, stats_data.race_id, stats_data.horse_id, stats_data.stat)
 
     if stats:
+        print(f"updating stats {stats.id}")
         repo.horse_race_stats.update_horse_race_stats(db, stats.id, stats_data)
     else:
         stats = repo.horse_race_stats.create(db,  stats_data)
+        print(f"created new stats {stats.id}")
 
     return stats
 

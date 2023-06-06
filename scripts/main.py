@@ -1,7 +1,9 @@
+from typing import List
 import os
-import re
+import sys
 import glob
 from pathlib import Path
+from datetime import datetime
 from sqlalchemy.orm import Session
 from utils.db_loader import load_db
 from utils.sftp_client import sftp_client
@@ -51,33 +53,42 @@ def delete_file_from_local_storage(file_path: str):
             print(f"Error occurred while deleting the file: {e}")
 
 
-def process_file(db: Session, file: str, timestamp: int, is_new: bool = False):
+def process_file(db: Session, filename: str, timestamp: int):
 
     # check if file exists in local storage
-    file_path = f"{str(path_root)}/storage/{file}"
+    file_path = f"{str(path_root)}/storage/{filename}"
 
     if os.path.exists(file_path):
         delete_file_from_local_storage(file_path)
 
     downloaded_file = sftp_client.download_file(
-        '/mr_form', file, f"{str(path_root)}/storage")
+        '/mr_form', filename, f"{str(path_root)}/storage")
 
     if downloaded_file:
         print(f"File downloaded successfully: {downloaded_file}")
-        if is_new:
+
+        file_in_db = repo.form_files.get_form_file_from_filename(
+            db, filename=filename)
+
+        if not file_in_db:
+            print("File not in DB. Creating FormFile entry...")
             file_in_db = repo.form_files.create(db, FormFilesCreate(
-                file_name=file, is_processed=False, is_uploaded=False, timestamp=timestamp
+                file_name=filename, is_processed=False, is_uploaded=False, timestamp=timestamp
             ))
-        else:
-            file_in_db = repo.form_files.get_form_file_from_filename(db, file)
 
         # process the File
-        if not file_in_db.is_processed:
-            load_file_to_db(db, downloaded_file, file_in_db)
+        print(f"Loading {filename} contents into DB... ")
+        load_file_to_db(db, downloaded_file, file_in_db)
+
+        # Update Timestamp
+        repo.form_files.update_timestamp(
+            db, file_in_db.id, timestamp=timestamp)
 
         # upload the file to S3
         if not file_in_db.is_uploaded:
             upload_processed_file(db, downloaded_file, file_in_db)
+
+        delete_file_from_local_storage(downloaded_file)
 
 
 def update_file(db: Session, file: str, timestamp: int):
@@ -99,8 +110,46 @@ def update_file(db: Session, file: str, timestamp: int):
         print(f"error processing file: {file.file_name}\n")
 
 
+def is_valid_date(date_string):
+    try:
+        # Parse the date string using the specified format
+        datetime.strptime(date_string, "%d/%m/%Y")
+        return True
+    except ValueError:
+        return False
+
+
+def get_start_params(db: Session, arguments: List[str]):
+    params = {}
+
+    for arg in arguments:
+        parts = arg.split('=')
+        if len(parts) == 2:
+            param, value = parts
+            params[param] = value
+
+    latest_file = repo.form_files.get_latest_form_file(db)
+
+    if 'start' in params:
+        if params['start'] == 'today':
+            now = datetime.now()
+            unix_time = int(now.timestamp())
+            return unix_time
+        elif is_valid_date(params['start']):
+            pass
+        else:
+            if latest_file:
+                return latest_file.timestamp
+    else:
+        if latest_file:
+            return latest_file.timestamp
+
+
 if __name__ == "__main__":
     print("Main Executing")
+
+    arguments = sys.argv
+    arguments = arguments[1:]
 
     # db = SessionLocal()
     # for file in file_list:
@@ -109,26 +158,29 @@ if __name__ == "__main__":
     #     if filename.endswith("_A.xml"):
     #         load_db(file)
 
-
 ### WORKING #####
 
     files = sftp_client.get_files_in_dir('/mr_form')
     # print(files)
 
     db = SessionLocal()
+    start_timestamp = get_start_params(db, arguments)
+
     for file in files:
-        print(f"Processing file: {file} ")
         filename = file.filename
         if filename.endswith("_A.xml"):
-            file_db_exists = repo.form_files.get_form_file_from_filename(
-                db, filename=filename)
-            if not file_db_exists:
+            if file.st_mtime > start_timestamp:
+
                 process_file(
-                    db, filename, timestamp=file.st_mtime, is_new=True)
-            else:
-                print(f"File in DB already exists: {file_db_exists.filename}")
-                if file.st_mtime > file_db_exists.timestamp:
-                    print("Perform update on file...")
-                elif file.st_mtime == file_db_exists.timestamp:
-                    process_file(
-                        db, filename, timestamp=file.st_mtime, is_new=False)
+                    db, filename, timestamp=file.st_mtime)
+                # if not file_db_exists:
+                #     process_file(
+                #         db, filename, timestamp=file.st_mtime)
+                # else:
+                #     print(
+                #         f"File in DB already exists: {file_db_exists.file_name}")
+                #     process_file(
+                #         db, filename, timestamp=file.st_mtime, file_in_db=file_db_exists)
+
+                #     if file.st_mtime > file_db_exists.timestamp:
+                #         print("Perform update on file...")
