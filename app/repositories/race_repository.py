@@ -9,7 +9,7 @@ from app.models.track import Track
 from app.models.horse import Horse
 from app.models.horse_race_info import HorseRaceInfo
 from app.models.horse_race_stats import HorseRaceStats
-from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema
+from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema, RaceWithMeeting, RaceListResults
 
 
 class RaceRepository:
@@ -26,13 +26,19 @@ class RaceRepository:
                   datetime_end: str = None, order_by: str = "date_time",  direction: str = "asc",
                   skip: int = 0, limit: int = 0, ) -> List[Race]:
 
-        query = db.query(Race)
+        stmt = (select(Race, Meeting)
+                .join(Meeting)
+                .options(joinedload(Meeting.track))
+                )
+
+        # query = db.query(Race)
 
         if meeting_id:
-            query = query.filter(Race.meeting_id == meeting_id)
+            stmt = stmt.where(Race.meeting_id == meeting_id)
+            # query = query.filter(Race.meeting_id == meeting_id)
 
         if date_time:
-            race_datetime = datetime.strptime(date_time, "%Y-%m-%d-%H_%M_%S")
+            race_datetime = datetime.strptime(date_time, "%Y-%m-%d-%H-%M")
             eq_filter_mapping = ["eq", "gt", "gteq", "lt", "lteq"]
             if date_filter in eq_filter_mapping:
                 filter_mapping = {
@@ -42,12 +48,15 @@ class RaceRepository:
                     "lteq": Race.date_time <= race_datetime,
                     "eq": Race.date_time == race_datetime,
                 }
-                query = query.filter(filter_mapping[date_filter])
+                stmt = stmt.where(filter_mapping[date_filter])
+                # query = query.filter(filter_mapping[date_filter])
             elif date_filter == "bet" and datetime_end:
                 race_datetime_end = datetime.strptime(
-                    datetime_end, "%Y-%m-%d-%H_%M_%S")
-                query = query.filter(
-                    Race.date_time.between(race_datetime, race_datetime_end))
+                    datetime_end, "%Y-%m-%d-%H-%M")
+                stmt = stmt.where(Race.date_time.between(
+                    race_datetime, race_datetime_end))
+                # query = query.filter(
+                #     Race.date_time.between(race_datetime, race_datetime_end))
 
         valid_fields = ["id", "race_id",
                         "date_time", "distance", "race_number"]
@@ -56,9 +65,19 @@ class RaceRepository:
         if order_by in valid_fields and direction in valid_directions:
             attribute = getattr(Race, order_by)
             ordering = getattr(attribute, direction)()
-            query = query.order_by(ordering)
+            stmt = stmt.order_by(ordering)
+            # query = query.order_by(ordering)
 
-        return query.offset(skip).limit(limit).all()
+        stmt = stmt.offset(skip).limit(limit)
+
+        results = db.execute(stmt).unique().all()
+
+        races = []
+        for result in results:
+            race, meeting = result
+            races.append(RaceWithMeeting.from_orm(race))
+
+        return RaceListResults(races=races)
 
     def get_race_by_id(self, db: Session, *, race_id: int) -> Race:
 

@@ -37,3 +37,15 @@ class Race(RaceInDb):
 
 class RaceWithMeeting(Race):
     meeting: Meeting
+
+
+class RaceListResults(BaseModel):
+    races: List[RaceWithMeeting]
+
+
+class MeetingWithRaces(Meeting):
+    races: List[Race]
+
+
+class MeetingListResults(BaseModel):
+    meetings: List[MeetingWithRaces]

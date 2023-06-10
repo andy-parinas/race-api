@@ -5,7 +5,9 @@ from sqlalchemy import select, update
 
 from app.models.meeting import Meeting
 from app.models.track import Track
+from app.models.race import Race
 from app.schemas.meeting import MeetingCreate, MeetingData, Meeting as MeetingSchema
+from app.schemas.race import MeetingWithRaces, MeetingListResults
 
 
 class MeetingRepository:
@@ -21,17 +23,26 @@ class MeetingRepository:
     def get_meetings(self, db: Session, *,  skip: int = 0, limit: int = 0,
                      state: Optional[str] = None, date: Optional[str] = None) -> List[Meeting]:
 
-        query = db.query(Meeting).options(joinedload(
-            Meeting.track)).options(joinedload(Meeting.races))
+        stmt = select(Meeting, Track).join(
+            Track).options(joinedload(Meeting.races))
 
         if state is not None:
-            query = query.filter(Meeting.track.has(state=state))
+            stmt = stmt.where(Meeting.track.has(state=state))
 
         if date is not None:
             query_date = datetime.strptime(date, '%Y-%m-%d').date()
-            query = query.filter(Meeting.date == query_date)
+            stmt = stmt.where(Meeting.date == query_date)
 
-        return query.offset(skip).limit(limit).all()
+        stmt = stmt.offset(skip).limit(limit)
+
+        results = db.execute(stmt).unique().all()
+
+        meetings = []
+        for result in results:
+            meeting, track = result
+            meetings.append(MeetingWithRaces.from_orm(meeting))
+
+        return MeetingListResults(meetings=meetings)
 
     def get_meeting_by_track_id_and_date(self, db: Session, track_id: int, date: str) -> Optional[Meeting]:
         query = db.query(Meeting).options(joinedload(Meeting.track)).filter(

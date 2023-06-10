@@ -2,7 +2,8 @@ from typing import Optional, Annotated
 from fastapi import APIRouter, status, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.schemas.meeting import MeetingListResults, MeetingQuery
+from app.schemas.meeting import MeetingQuery
+from app.schemas.race import MeetingListResults
 from app import repositories as repo
 from app.db.session import get_db
 
@@ -10,7 +11,7 @@ from app.db.session import get_db
 router = APIRouter()
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
 def get_meetings(
     state: Annotated[str | None, Query(
         description="State where meeting is held")] = None,

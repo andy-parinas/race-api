@@ -6,16 +6,17 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app import repositories as repo
 from app.schemas.meeting import MeetingData
+from app.schemas.race import RaceListResults
 
 router = APIRouter()
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=RaceListResults)
 def get_races(
     meeting_id: Annotated[int | None, Query(
         description="The Meeting ID")] = None,
     datetime: Annotated[str | None, Query(
-        description="Date and Time of the Race")] = None,
+        description="Date and Time of the Race. ex: 2023-12-31-16-30")] = None,
     datetime_end: Annotated[str | None, Query(
         description="Date and Time of the Race when using between")] = None,
     date_filter: Annotated[str | None, Query(
@@ -36,10 +37,14 @@ def get_races(
     validate the query parameters
     """
     datetime = validate_datetime_param(datetime) if datetime else None
+
     datetime_end = validate_datetime_param(
         datetime_end) if datetime_end else None
+
     order_by = validate_order_by(order_by) if order_by else None
+
     direction = validate_direction(direction) if direction else None
+
     date_filter = validate_date_filter(date_filter) if date_filter else None
 
     races = repo.race.get_races(db, meeting_id=meeting_id, date_time=datetime, datetime_end=datetime_end,
@@ -68,10 +73,10 @@ def get_race(
 
 def validate_datetime_param(datetime_param: str) -> str:
 
-    datetime_regex = r"\d{4}-\d{2}-\d{2}-\d{2}_\d{2}_\d{2}"
+    datetime_regex = r"\d{4}-\d{2}-\d{2}-\d{2}-\d{2}"
     if not re.match(datetime_regex, datetime_param):
         raise HTTPException(
-            status_code=400, detail="Invalid datetime format. Expected format: YYYY-MM-DD-HH_MM_SS")
+            status_code=400, detail="Invalid datetime format. Expected format: YYYY-MM-DD-HH-MM")
 
     return datetime_param
 

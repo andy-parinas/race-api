@@ -4,6 +4,7 @@ from datetime import date
 from pydantic import BaseModel
 
 from app.schemas.track import Track
+# from app.schemas.race import Race
 
 
 class TrackSurface(str, Enum):
@@ -52,10 +53,6 @@ class MeetingInDbBase(MeetingBase):
 
 class Meeting(MeetingInDbBase):
     track: Track
-
-
-class MeetingListResults(BaseModel):
-    results: Sequence[Meeting]
 
 
 # class MeetingData(BaseModel):
