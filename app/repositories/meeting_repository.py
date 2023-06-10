@@ -60,6 +60,20 @@ class MeetingRepository:
 
         return MeetingSchema.from_orm(meeting)
 
+    def get_mmeting_by_id(self, db: Session, id: int):
+        stmt = (select(Meeting, Track)
+                .join(Track)
+                .options(joinedload(Meeting.races))
+                .where(Meeting.id == id)
+                )
+
+        meeting = db.scalars(stmt).first()
+
+        if not meeting:
+            return None
+
+        return MeetingWithRaces.from_orm(meeting)
+
     def update_meeting(self, db: Session, id: int, meeting_data: MeetingData):
         stmt = (update(Meeting).returning(Meeting)
                 .where(Meeting.id == id)

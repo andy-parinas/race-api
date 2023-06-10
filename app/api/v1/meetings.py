@@ -1,9 +1,9 @@
 from typing import Optional, Annotated
-from fastapi import APIRouter, status, Depends, Query
+from fastapi import APIRouter, status, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from app.schemas.meeting import MeetingQuery
-from app.schemas.race import MeetingListResults
+from app.schemas.race import MeetingListResults, MeetingWithRaces
 from app import repositories as repo
 from app.db.session import get_db
 
@@ -30,6 +30,17 @@ def get_meetings(
         db, date=date, state=state, limit=max_results, skip=skip)
     return meetings
 
+
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=MeetingWithRaces)
+def get_meeting(id: int, db: Session = Depends(get_db)):
+
+    meeting = repo.meeting.get_mmeting_by_id(db, id=id)
+
+    if not meeting:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Meeting with Id not found")
+
+    return meeting
 
 # @router.post("/", status_code=status.HTTP_200_OK, response_model=MeetingListResults)
 # @router.post("/", status_code=status.HTTP_200_OK)

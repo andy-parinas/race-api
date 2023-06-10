@@ -3,6 +3,7 @@ from app.schemas.track import TrackData
 from sqlalchemy.orm import Session
 from app import repositories as repo
 from app.schemas.meeting import MeetingData, Meeting
+from app.schemas.race import MeetingWithRaces
 
 from app import models
 
@@ -30,6 +31,13 @@ def test_can_get_meeting(test_db, meeting_data):
 
     assert meeting is not None
     assert isinstance(meeting, Meeting)
+
+
+def test_can_get_meeting_by_id(test_db, meeting_data: models.Meeting):
+    meeting = repo.meeting.get_mmeting_by_id(db=test_db, id=meeting_data.id)
+
+    assert meeting is not None
+    assert isinstance(meeting, MeetingWithRaces)
 
 
 def test_can_update_meeting(test_db, meeting_data: models.Meeting):
