@@ -3,6 +3,7 @@ from typing import Sequence, List
 from pydantic import BaseModel
 
 from app.schemas.horse_race_stats import HorseRaceStat
+from app.schemas.horse_race_info import HorseRaceInfo
 
 
 class HorseBase(BaseModel):
@@ -34,6 +35,11 @@ class Horse(HorseInDbBase):
 
 class HorseWithStats(Horse):
     stats: List[HorseRaceStat]
+
+
+class HorseWithStatsAndInfo(Horse):
+    stats: List[HorseRaceStat]
+    infos: List[HorseRaceInfo]
 
 
 class HorseResult(HorseInDbBase):

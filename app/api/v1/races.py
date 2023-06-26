@@ -60,7 +60,7 @@ def get_race(
     db: Session = Depends(get_db)
 ):
     if not horse_id:
-        race = repo.race.get_race_by_id(db, race_id=race_id)
+        race = repo.race.get_race_by_id(db, id=race_id)
     else:
         race = repo.horse_race_info.get_horse_race_info(
             db, race_id=race_id, horse_id=horse_id)

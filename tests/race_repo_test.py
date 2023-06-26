@@ -3,7 +3,7 @@ from app import repositories as repo
 from app.schemas.race import RaceCreate, Race, RaceData
 from app import models
 
-from .setup import test_db, track_data, meeting_data, race_data
+from .setup import test_db, track_data, meeting_data, race_data, horse_race_info_data, horse_race_stats_data, horse_data
 
 
 def test_can_create_race(test_db, meeting_data):
@@ -26,6 +26,15 @@ def test_can_get_race(test_db, race_data: models.Race):
 
     assert race is not None
     assert isinstance(race, Race)
+
+
+def test_can_get_race_with_details(test_db, race_data: models.Race, horse_race_info_data, horse_race_stats_data):
+
+    race = repo.race.get_race_by_id(db=test_db, id=race_data.id)
+
+    print(race)
+
+    assert True
 
 
 def test_can_update_race(test_db, race_data: models.Race):

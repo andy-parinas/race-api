@@ -8,6 +8,8 @@ from app.models.track import Track
 from app.models.meeting import Meeting
 from app.models.horse import Horse
 from app.models.race import Race
+from app.models.horse_race_info import HorseRaceInfo
+from app.models.horse_race_stats import HorseRaceStats
 
 from app.main import app
 from app.db.session import get_db
@@ -86,3 +88,42 @@ def horse_data(test_db: Session):
     )
 
     yield horses.scalars().first()
+
+
+@pytest.fixture(scope="module")
+def horse_race_info_data(test_db: Session, horse_data: Horse, race_data: Race):
+    infos = test_db.execute(
+        insert(HorseRaceInfo).returning(HorseRaceInfo), [
+            {
+                "race_id": race_data.id,
+                "horse_id": horse_data.id,
+                "colours": "red",
+                "colours_pic": "red.png",
+                "trainer": "Trainer Name",
+                "jockey": "Jockey Name",
+                "barrier": 1,
+                "last_starts": "1x1x1"
+            }
+        ]
+    )
+
+    yield infos.scalars().first()
+
+
+@pytest.fixture(scope="module")
+def horse_race_stats_data(test_db: Session, horse_data: Horse, race_data: Race):
+    stats = test_db.execute(
+        insert(HorseRaceStats).returning(HorseRaceStats), [
+            {
+                "race_id": race_data.id,
+                "horse_id": horse_data.id,
+                "stat": "distance",
+                "first": 1,
+                "second": 0,
+                "third": 0,
+                "win_ratio": 1
+            }
+        ]
+    )
+
+    yield stats.scalars().first()

@@ -2,10 +2,6 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
-from app.schemas.race import Race
-from app.schemas.horse import Horse, HorseWithStats
-from app.schemas.horse_race_stats import HorseRaceStat
-
 
 class HorseRaceInfoBase(BaseModel):
     colours: str

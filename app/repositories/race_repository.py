@@ -8,8 +8,9 @@ from app.models.meeting import Meeting
 from app.models.track import Track
 from app.models.horse import Horse
 from app.models.horse_race_info import HorseRaceInfo
-from app.models.horse_race_stats import HorseRaceStats
-from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema, RaceWithMeeting, RaceListResults
+# from app.models.horse_race_stats import HorseRaceStats
+from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema, RaceWithMeeting, RaceListResults, HorseRaceInfoAndStats, HorseRaceInfoAndStatsList, HorseWithStatsAndInfo, RaceDetailsWithHorseStats
+# from app.schemas.horse_race_info import HorseRaceInfo as HorseRaceInfoSchema
 
 
 class RaceRepository:
@@ -79,25 +80,34 @@ class RaceRepository:
 
         return RaceListResults(races=races)
 
-    def get_race_by_id(self, db: Session, *, race_id: int) -> Race:
+    def get_race_by_id(self, db: Session, *, id: int) -> Race:
 
-        query = (
-            db.query(Race)
+        # stmt = (
+        #     select(HorseRaceInfo, Race, Horse)
+        #     .join(Race)
+        #     .join(Horse).options(joinedload(Horse.stats))
+        #     .where(HorseRaceInfo.race_id == id)
+        # )
+
+        stmt = (
+            select(Race)
             .options(
-                joinedload(Race.meeting).joinedload(Meeting.track),
-                # joinedload(Race.stats),
-                joinedload(Race.horses).joinedload(
-                    Horse.infos),
                 joinedload(Race.horses).joinedload(Horse.stats)
-
             )
+            .options(joinedload(Race.horses).joinedload(Horse.infos))
+            .where(Race.id == id)
         )
 
-        query = query.filter(Race.id == race_id)
+        # results = db.execute(stmt).unique().first()
+        race = db.scalars(stmt).first()
 
-        race = query.first()
+        # print(race)
 
-        return race
+        # race, = results
+
+        race_data = RaceDetailsWithHorseStats.from_orm(race)
+
+        return race_data
 
     def get_race(self, db: Session, *, race_id: int = None, date_time: str = None, race_number: int = None, meeting_id: int = None):
 
