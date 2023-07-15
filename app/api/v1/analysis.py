@@ -80,7 +80,7 @@ def __get_analysis_results_values(db, results, race_horses: List[Dict[int, List[
         for race in race_horses:
             for race_id, horse_ids in race.items():
                 if horse_id in horse_ids:
-                    horse_race_info = repo.horse_race_info.get_horse_race_info(
+                    horse_race_info = repo.horse_race_info.get_horse_race_info_details(
                         db, race_id=race_id, horse_id=horse_id)
                     if horse_race_info:
                         output.append({
