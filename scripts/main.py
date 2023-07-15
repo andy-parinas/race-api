@@ -136,7 +136,7 @@ def get_start_params(db: Session, arguments: List[str]):
             unix_time = int(now.timestamp())
             return unix_time
         elif is_valid_date(params['start']):
-            pass
+            return datetime.strptime(params['start'], "%d/%m/%Y").timestamp()
         else:
             if latest_file:
                 return latest_file.timestamp
@@ -145,6 +145,11 @@ def get_start_params(db: Session, arguments: List[str]):
             return latest_file.timestamp
 
 
+"""
+Commandline Syntax:
+- python script/main.py start=today
+- python script/main.py start=31/12/2023
+"""
 if __name__ == "__main__":
     print("Main Executing")
 

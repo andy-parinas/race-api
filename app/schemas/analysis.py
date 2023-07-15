@@ -7,6 +7,7 @@ class PreferenceType(str, Enum):
     balance = "balance"
     weighted = "weighted"
 
+
 class Preference(BaseModel):
     first: str
     second: str
@@ -15,6 +16,6 @@ class Preference(BaseModel):
 
 class AnalsyisInput(BaseModel):
     race_ids: List[int]
-    preference: Optional[Preference]
+    # preference: Optional[Preference]
     preferences: Optional[List[str]]
     preference_type: PreferenceType

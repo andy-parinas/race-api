@@ -32,6 +32,7 @@ def load_db(file, update=False):
     meeting_date = parser.get_meeting_date()
     meeting_xml_data = parser.get_meeting_data()
 
+    track_name = meeting_xml_data['track_name']
     track_data = TrackData(
         name=meeting_xml_data['track_name'],
         track_id=meeting_xml_data['track_id'],
@@ -51,9 +52,10 @@ def load_db(file, update=False):
     for race in races:
         start_time = parser.get_race_start_time(race)
 
+        race_number = int(race['number'])
         race_db = process_race_data(db, RaceData(
             race_id=race['id'],
-            race_number=int(race['number']),
+            race_number=race_number,
             name=race['name'],
             meeting_id=meeting.id,
             date_time=datetime.strptime(
@@ -70,6 +72,9 @@ def load_db(file, update=False):
                 race_id=race_db.id
             ))
 
+            date_folder = convert_date_format(meeting_date)
+            name_folder = track_name.lower().replace(" ", "_")
+            image_folder = f"{date_folder}/{name_folder}/r{race_number}"
             process_horse_race_info_data(db, HorseRaceInfoData(
                 horse_id=horse_db.id,
                 race_id=race_db.id,
@@ -78,7 +83,7 @@ def load_db(file, update=False):
                 last_starts=parser.get_last_starts(horse),
                 colours=parser.get_horse_colours(horse),
                 colours_pic=upload_horse_colours(
-                    s3_client, parser.get_horse_colours_image(horse)),
+                    s3_client, image_folder, parser.get_horse_colours_image(horse)),
                 barrier=parser.get_horse_barrier(horse)
             ))
 
@@ -187,19 +192,32 @@ def process_horse_race_stats_data(db: Session, stats_data: HorseRaceStatsData):
     return stats
 
 
-def upload_horse_colours(s3_client, colours_data):
+def upload_horse_colours(s3_client, folder,  colours_data):
     image_data, filename = image_download(colours_data)
 
     colours_image = ""
     if image_data and filename:
+        object_name = f"{folder}/{filename}"
         uploaded = s3_client.upload_image(
-            image_data, settings.IMAGE_FOLDER, filename)
+            image_data, settings.IMAGE_FOLDER, object_name)
         if uploaded:
             s3_client.make_object_public(
-                settings.IMAGE_FOLDER, filename)
-            colours_image = f"{settings.IMAGE_URL}/{filename}"
+                settings.IMAGE_FOLDER, object_name)
+            colours_image = f"{settings.IMAGE_URL}/{object_name}"
 
     return colours_image
+
+
+def convert_date_format(date_string, output_format="%Y-%m-%d"):
+    input_format = '%d/%m/%Y'
+
+    # Convert the input date string to a datetime object
+    date_object = datetime.strptime(date_string, input_format)
+
+    # Convert the datetime object to the desired output format
+    formatted_date = date_object.strftime(output_format)
+
+    return formatted_date
 
 
 # def test_data(file):
