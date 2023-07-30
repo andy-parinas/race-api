@@ -14,7 +14,7 @@ from app.schemas.analysis import PreferenceType
 class AnalysisBase:
     def __init__(self, df: DataFrame, prefrerences: Tuple[str], preference_type: PreferenceType) -> None:
         self.df = df
-        self.preferences = tuple(prefrerences)
+        self.preferences = prefrerences
         self.preference_type = preference_type
         self.preferences_count = len(self.preferences)
 
@@ -25,7 +25,7 @@ class AnalysisBase:
             return self.compute_weighted_value(self.preferences)
 
     def compute_weighted_value(self, preferences):
-        print(preferences)
+        # print(preferences)
         count = len(preferences)
         weight_rating = list(range(count, 0, -1))
         sum_of_weight = sum(weight_rating)
@@ -38,6 +38,7 @@ class AnalysisBase:
 
     def compute_balance_value(self, preferences):
         result = []
+        # print(preferences)
         for pref in preferences:
             result.append((pref, 1/len(preferences)))
 
@@ -51,6 +52,8 @@ class BayseAnalysis(AnalysisBase):
     def get_likelihood(self, data: DataFrame):
         likelihood = pd.Series(dtype=float)
         preferences = self.get_preference_weight()
+        # print("##### PREFERENCES #####")
+        # print(preferences)
         for pref in preferences:
             s = data[pref[0]] * pref[1]
             likelihood = likelihood.add(s, fill_value=0)
@@ -60,6 +63,7 @@ class BayseAnalysis(AnalysisBase):
     def transform_dataframe(self):
         data = self.df.pivot_table(
             index='horse_id', columns='stat', values='win_ratio')
+
         return data
 
     def get_probability(self, data: DataFrame, likelihood: Series):
@@ -67,10 +71,15 @@ class BayseAnalysis(AnalysisBase):
             'likelihood')), left_index=True, right_index=True)
 
         data['prior'] = data['all']
+        # print(data['prior'])
         if (data['prior'] == 0).all():
             data['unnormalized_posterior'] = data['likelihood']
         else:
             data["unnormalized_posterior"] = data['prior'] * data['likelihood']
+
+        # print(data['likelihood'])
+
+        # print(data["unnormalized_posterior"])
 
         normalization_factor = data["unnormalized_posterior"].sum()
 

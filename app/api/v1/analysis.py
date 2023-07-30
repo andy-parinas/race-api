@@ -116,11 +116,23 @@ def __convert_stat_to_df(stat_query_results):
 
 def __get_bayes_results(df: DataFrame, selected_preferences: List[str], preference_type):
 
-    bayes = BayseAnalysis(df=df, prefrerences=selected_preferences,
+    # print(df)
+
+    stat_preferences = selected_preferences.copy()
+
+    if "all" in stat_preferences:
+        stat_preferences.remove("all")
+
+    bayes = BayseAnalysis(df=df, prefrerences=stat_preferences,
                           preference_type=preference_type)
 
     data = bayes.transform_dataframe()
+
+    # print(data)
+
     likelihood = bayes.get_likelihood(data)
+
+    # print(likelihood)
 
     # return likelihood
     return bayes.get_probability(data, likelihood)
