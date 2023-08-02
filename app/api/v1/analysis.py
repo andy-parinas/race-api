@@ -8,7 +8,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import Preference, BayseAnalysis
+from app.services.analysis_service import BasicAnalysis, Preference, BayseAnalysis
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ router = APIRouter()
 def analyse_race_advance(analysis_in: AnalsyisInput,  db: Session = Depends(get_db)):
 
     preferences = analysis_in.preferences
-    preferences.append("all")
+    # preferences.append("all")
 
     results, race_horses = __analyze_multiple_race(
         db, analysis_in.race_ids, preferences, analysis_in.preference_type)
@@ -103,7 +103,7 @@ def __analyze_single_race(db, race_id, preferences, preference_type):
 
     stat_df = __convert_stat_to_df(race_query_results)
 
-    single_race_result = __get_bayes_results(
+    single_race_result = __get_basic_result(
         stat_df, preferences, preference_type)
 
     return single_race_result, {race_id: list(single_race_result.keys())}
@@ -112,6 +112,23 @@ def __analyze_single_race(db, race_id, preferences, preference_type):
 def __convert_stat_to_df(stat_query_results):
     race_stat_data = [race_stat.dict() for race_stat in stat_query_results]
     return DataFrame(race_stat_data)
+
+
+def __get_basic_result(df: DataFrame, selected_preferences: List[str], preference_type):
+
+    stat_preferences = selected_preferences.copy()
+
+    if "all" in stat_preferences:
+        stat_preferences.remove("all")
+
+    basic = BasicAnalysis(df=df, prefrerences=stat_preferences,
+                          preference_type=preference_type)
+
+    data = basic.transform_dataframe()
+
+    likelihood = basic.get_likelihood(data)
+
+    return basic.get_probability(likelihood=likelihood)
 
 
 def __get_bayes_results(df: DataFrame, selected_preferences: List[str], preference_type):

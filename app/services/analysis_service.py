@@ -45,6 +45,33 @@ class AnalysisBase:
         return result
 
 
+class BasicAnalysis(AnalysisBase):
+    def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
+        super().__init__(df, prefrerences, preference_type)
+
+    def transform_dataframe(self):
+        data = self.df.pivot_table(
+            index='horse_id', columns='stat', values='win_ratio')
+
+        return data
+
+    def get_likelihood(self, data: DataFrame):
+        likelihood = pd.Series(dtype=float)
+        preferences = self.get_preference_weight()
+
+        for pref in preferences:
+            s = data[pref[0]] * pref[1]
+            likelihood = likelihood.add(s, fill_value=0)
+
+        return likelihood
+
+    def get_probability(self, likelihood: Series):
+
+        data = likelihood.sort_values(ascending=[False])
+
+        return data.head(4).to_dict()
+
+
 class BayseAnalysis(AnalysisBase):
     def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
         super().__init__(df, prefrerences, preference_type)
