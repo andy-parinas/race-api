@@ -8,14 +8,13 @@ from app.schemas.horse_race_stats import HorseRaceStatsCreate, HorseRaceStatsDat
 
 class HorseRaceStatsRepository:
 
-    def create(self, db: Session, data_in: HorseRaceStatsCreate) -> HorseRaceStats:
+    def create(self, db: Session, data_in: HorseRaceStatsCreate, last_starts: str) -> HorseRaceStats:
 
         data_in.win_ratio = self.__compute_win_ratio(
             total=data_in.total, first=data_in.first,
-            second=data_in.second, third=data_in.third)
+            second=data_in.second, third=data_in.third, stats=data_in.stat, last_starts=last_starts)
 
         data_obj = data_in.dict()
-        print(data_obj)
         db_obj = HorseRaceStats(**data_obj)
         db.add(db_obj)
         db.commit()
@@ -56,11 +55,11 @@ class HorseRaceStatsRepository:
 
         return HorseRaceStatSchema.from_orm(stats)
 
-    def update_horse_race_stats(self, db: Session, id: int, stats_data: HorseRaceStatsData):
+    def update_horse_race_stats(self, db: Session, id: int, stats_data: HorseRaceStatsData, last_starts: str):
 
         win_ratio = self.__compute_win_ratio(
             total=stats_data.total, first=stats_data.first,
-            second=stats_data.second, third=stats_data.third)
+            second=stats_data.second, third=stats_data.third,  stats=stats_data.stat, last_starts=last_starts)
 
         stmt = update(HorseRaceStats).where(HorseRaceStats.id == id).values(
             stat=stats_data.stat,
@@ -74,12 +73,33 @@ class HorseRaceStatsRepository:
         db.execute(stmt)
         db.commit()
 
-    def __compute_win_ratio(self, *, total, first, second, third):
+    def __compute_win_ratio(self, *, total, first, second, third, stats: str, last_starts: str):
         win_ratio = 0
+
         if total > 0:
+            if stats == "first_up":
+                if not self.__with_first_up(last_starts):
+                    return 0
+
+            if stats == "second_up":
+                if not self.__with_second_up(last_starts):
+                    return 0
+
             win_ratio = (first + second * 0.5 + third * 0.25) / total
 
         return win_ratio
+
+    def __with_first_up(self, last_starts) -> bool:
+        if len(last_starts) >= 2 and last_starts[-1] == 'x':
+            return True
+        else:
+            return False
+
+    def __with_second_up(self, last_starts) -> bool:
+        if len(last_starts) >= 2 and last_starts[-2] == 'x':
+            return True
+        else:
+            return False
 
 
 horse_race_stats = HorseRaceStatsRepository()

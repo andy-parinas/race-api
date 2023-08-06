@@ -75,12 +75,14 @@ def load_db(file, update=False):
             date_folder = convert_date_format(meeting_date)
             name_folder = track_name.lower().replace(" ", "_")
             image_folder = f"{date_folder}/{name_folder}/r{race_number}"
+            last_starts = parser.get_last_starts(horse)
+
             process_horse_race_info_data(db, HorseRaceInfoData(
                 horse_id=horse_db.id,
                 race_id=race_db.id,
                 jockey=parser.get_horse_jockey(horse),
                 trainer=parser.get_horse_trainer(horse),
-                last_starts=parser.get_last_starts(horse),
+                last_starts=last_starts,
                 colours=parser.get_horse_colours(horse),
                 colours_pic=upload_horse_colours(
                     s3_client, image_folder, parser.get_horse_colours_image(horse)),
@@ -98,7 +100,7 @@ def load_db(file, update=False):
                         third=int(stat['thirds']),
                         horse_id=horse_db.id,
                         race_id=race_db.id,
-                    ))
+                    ), last_starts=last_starts)
 
     print("File Loaded to DB Successfully.")
 
@@ -177,16 +179,17 @@ def process_horse_race_info_data(db: Session, info_data: HorseRaceInfoData):
     return info
 
 
-def process_horse_race_stats_data(db: Session, stats_data: HorseRaceStatsData):
+def process_horse_race_stats_data(db: Session, stats_data: HorseRaceStatsData, last_starts: str):
 
     stats = repo.horse_race_stats.get_horse_race_stats(
         db, stats_data.race_id, stats_data.horse_id, stats_data.stat)
 
     if stats:
         print(f"updating stats {stats.id}")
-        repo.horse_race_stats.update_horse_race_stats(db, stats.id, stats_data)
+        repo.horse_race_stats.update_horse_race_stats(
+            db, stats.id, stats_data, last_starts)
     else:
-        stats = repo.horse_race_stats.create(db,  stats_data)
+        stats = repo.horse_race_stats.create(db,  stats_data, last_starts)
         print(f"created new stats {stats.id}")
 
     return stats
