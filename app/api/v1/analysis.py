@@ -95,8 +95,9 @@ def __get_analysis_results_values(db, results, race_horses: List[Dict[int, List[
 
 def __analyze_single_race(db, race_id, preferences, preference_type):
 
-    race_query_results = repo.horse_race_stats.get_stats(
+    race_query_results = repo.horse_race_stats.get_selective_stats(
         db, race_ids=[race_id], stats=preferences)
+
 
     if not race_query_results or len(race_query_results) == 0:
         return None

@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, update
 
 from app.models.horse_race_stats import HorseRaceStats
-from app.schemas.horse_race_stats import HorseRaceStatsCreate, HorseRaceStatsData, HorseRaceStat as HorseRaceStatSchema
+from app.schemas.horse_race_stats import (
+    HorseRaceStatsCreate,
+    HorseRaceStatsData,
+    HorseRaceStat as HorseRaceStatSchema
+)
 
 
 class HorseRaceStatsRepository:
@@ -38,8 +42,51 @@ class HorseRaceStatsRepository:
 
         stats = query.order_by(HorseRaceStats.id).all()
 
+
         # return HorseRaceStatSchema.from_orm(stats)
         return [HorseRaceStatSchema.from_orm(stat) for stat in stats]
+
+    def get_selective_stats(self, db: Session, *,
+                            race_ids: List[int] | None = None,
+                            horse_ids: List[int] | None = None,
+                            stats: List[str] | None = None) -> List[HorseRaceStatSchema]:
+
+        stmt = select(HorseRaceStats)
+
+        if race_ids:
+            stmt = stmt.where(HorseRaceStats.race_id.in_(race_ids))
+
+        if horse_ids:
+            stmt = stmt.where(HorseRaceStats.horse_id.in_(horse_ids))
+
+        if stats:
+            stmt = stmt.where(HorseRaceStats.stat.in_(stats))
+
+        stmt = stmt.order_by(HorseRaceStats.id)
+
+        results = db.execute(stmt).unique().all()
+
+        stats_results = []
+        exclude_horse_id = set()
+        for result in results:
+            stat, = result
+
+            if stat.stat == "first_up" or stat.stat == "second_up":
+                if stat.win_ratio == 0:
+                    exclude_horse_id.add(stat.horse_id)
+
+            stat_schema = HorseRaceStatSchema.from_orm(stat)
+            stats_results.append(stat_schema)
+
+        if not exclude_horse_id:
+            return stats_results
+
+        filtered_result = []
+        for stat_result in stats_results:
+            if stat_result.horse_id not in exclude_horse_id:
+                filtered_result.append(stat_result)
+
+        return filtered_result
 
     def get_by_id(self, db: Session, *, stat_id: int) -> HorseRaceStats:
         return db.query(HorseRaceStats).filter(HorseRaceStats.id == stat_id).first()
@@ -59,7 +106,7 @@ class HorseRaceStatsRepository:
 
         win_ratio = self.__compute_win_ratio(
             total=stats_data.total, first=stats_data.first,
-            second=stats_data.second, third=stats_data.third,  stats=stats_data.stat, last_starts=last_starts)
+            second=stats_data.second, third=stats_data.third, stats=stats_data.stat, last_starts=last_starts)
 
         stmt = update(HorseRaceStats).where(HorseRaceStats.id == id).values(
             stat=stats_data.stat,
