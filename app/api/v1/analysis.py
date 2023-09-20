@@ -37,10 +37,7 @@ def __analyze_multiple_race(db, race_ids, preferences, preference_type):
     race_horses = []
 
     for race_id in race_ids:
-        single_race_analysis = __analyze_single_race( db, race_id, preferences, preference_type)
-
-        print("Multi Race - Single Analysis")
-        print(single_race_analysis)
+        single_race_analysis = __analyze_single_race(db, race_id, preferences, preference_type)
 
         if single_race_analysis is not None:
 
@@ -61,10 +58,8 @@ def __analyze_multiple_race(db, race_ids, preferences, preference_type):
                 final_df = concat([final_df, analysis_df], ignore_index=False)
 
     """
-    Sort the values from highes to lowest rating
+    Sort the values from highest to lowest rating
     """
-    print("final_df")
-    print(final_df)
     if len(final_df) > 0:
         final_df = final_df.sort_values(['rating'], ascending=[False])
 
