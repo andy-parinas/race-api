@@ -72,6 +72,7 @@ class HorseRaceStatsRepository:
             stat, = result
 
             if stat.stat == "first_up" or stat.stat == "second_up":
+
                 if stat.win_ratio == 0:
                     exclude_horse_id.add(stat.horse_id)
 
@@ -86,6 +87,7 @@ class HorseRaceStatsRepository:
             if stat_result.horse_id not in exclude_horse_id:
                 filtered_result.append(stat_result)
 
+        print(filtered_result)
         return filtered_result
 
     def get_by_id(self, db: Session, *, stat_id: int) -> HorseRaceStats:
