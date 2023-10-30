@@ -45,6 +45,60 @@ class AnalysisBase:
         return result
 
 
+class ExponentialAnalysis(AnalysisBase):
+    def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
+        super().__init__(df, prefrerences, preference_type)
+
+    def get_preference_total_sum(self):
+        preferences_sum = {}
+        for pref in self.preferences:
+            preferences_sum[pref] = self.df[self.df['stat'] == pref]['total'].sum()
+
+        return preferences_sum
+
+    def compute_extra_data(self):
+        preferences_sum = self.get_preference_total_sum()
+
+        self.df['modified_weight'] = self.df.apply(
+            lambda row: row['win_ratio'] * 0.6 + (row['total'] / preferences_sum[row['stat']]) * 0.4, axis=1)
+        self.df['exponential_weight'] = self.df.apply(lambda row: 2.718281828459045 ** row['modified_weight'], axis=1)
+
+    def get_total_exponential(self):
+
+        self.compute_extra_data()
+
+        exponential_sum = {}
+        for pref in self.preferences:
+            exponential_sum[pref] = self.df[self.df['stat'] == pref]['exponential_weight'].sum()
+
+        return exponential_sum
+
+
+
+    def compute_rating(self):
+
+        preferences = self.get_preference_weight()
+
+        preference_weight = {key: int(value * 100) for key, value in preferences}
+
+        exponential_sums = self.get_total_exponential()
+        self.df['normalized_exponential'] = self.df.apply(
+            lambda row: row['exponential_weight'] / exponential_sums[row['stat']], axis=1)
+
+        self.df['rating'] = self.df.apply(lambda row: row['normalized_exponential'] * preference_weight[row['stat']],
+                                            axis=1)
+
+        return self.df
+
+    def transform_dataframe(self):
+        self.compute_rating()
+
+        data = self.df.pivot_table(
+            index='horse_id', columns='stat', values='rating')
+
+        return data
+
+
 class BasicAnalysis(AnalysisBase):
     def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
         super().__init__(df, prefrerences, preference_type)
@@ -58,7 +112,7 @@ class BasicAnalysis(AnalysisBase):
     def get_likelihood(self, data: DataFrame):
         likelihood = pd.Series(dtype=float)
         preferences = self.get_preference_weight()
-
+        print(preferences)
         for pref in preferences:
             s = data[pref[0]] * pref[1]
             likelihood = likelihood.add(s, fill_value=0)
@@ -80,7 +134,6 @@ class BayseAnalysis(AnalysisBase):
         likelihood = pd.Series(dtype=float)
         preferences = self.get_preference_weight()
         # print("##### PREFERENCES #####")
-        # print(preferences)
         for pref in preferences:
             s = data[pref[0]] * pref[1]
             likelihood = likelihood.add(s, fill_value=0)

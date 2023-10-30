@@ -8,7 +8,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import BasicAnalysis, Preference, BayseAnalysis
+from app.services.analysis_service import BasicAnalysis, Preference, BayseAnalysis, ExponentialAnalysis
 
 router = APIRouter()
 
@@ -131,6 +131,11 @@ def __get_basic_result(df: DataFrame, selected_preferences: List[str], preferenc
 
     basic = BasicAnalysis(df=df, prefrerences=stat_preferences,
                           preference_type=preference_type)
+
+    exponential = ExponentialAnalysis(df=df, prefrerences=stat_preferences,
+                          preference_type=preference_type)
+
+    print(exponential.transform_dataframe())
 
     data = basic.transform_dataframe()
 
