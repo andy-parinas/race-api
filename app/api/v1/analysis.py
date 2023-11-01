@@ -39,9 +39,11 @@ def __analyze_multiple_race(db, race_ids, preferences, preference_type):
     for race_id in race_ids:
         single_race_analysis = __analyze_single_race(db, race_id, preferences, preference_type)
 
+
         if single_race_analysis is not None:
 
             single_race_result, horse_ids = single_race_analysis
+
 
             race_horses.append(horse_ids)
 
@@ -135,13 +137,17 @@ def __get_basic_result(df: DataFrame, selected_preferences: List[str], preferenc
     exponential = ExponentialAnalysis(df=df, prefrerences=stat_preferences,
                           preference_type=preference_type)
 
-    print(exponential.transform_dataframe())
+    # print(exponential.transform_dataframe())
 
-    data = basic.transform_dataframe()
+    print(exponential.get_final_rating())
 
-    likelihood = basic.get_likelihood(data)
+    # data = basic.transform_dataframe()
+    #
+    # likelihood = basic.get_likelihood(data)
+    #
+    # return basic.get_probability(likelihood=likelihood)
 
-    return basic.get_probability(likelihood=likelihood)
+    return exponential.get_final_rating()
 
 
 def __get_bayes_results(df: DataFrame, selected_preferences: List[str], preference_type):

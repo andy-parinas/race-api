@@ -98,6 +98,25 @@ class ExponentialAnalysis(AnalysisBase):
 
         return data
 
+    def sum_rating(self, row, *column_names):
+        values = [row[col] for col in column_names if row[col] > 0]
+        num_columns = len(values)
+
+        if num_columns == 0:
+            return 0.0
+        elif num_columns == 1:
+            return round(values[0]) / 100
+        else:
+            return round(sum(values)) / 100
+
+    def get_final_rating(self):
+        data = self.transform_dataframe()
+
+        data['rating_summation'] = data.apply(lambda row: self.sum_rating(row, *self.preferences), axis=1)
+
+        final_data = data.sort_values('rating_summation', ascending=[False])
+
+        return final_data['rating_summation'].head(4).to_dict()
 
 class BasicAnalysis(AnalysisBase):
     def __init__(self, df: DataFrame, prefrerences: List[str], preference_type: PreferenceType) -> None:
