@@ -59,8 +59,10 @@ class ExponentialAnalysis(AnalysisBase):
     def compute_extra_data(self):
         preferences_sum = self.get_preference_total_sum()
 
+        print(preferences_sum)
+
         self.df['modified_weight'] = self.df.apply(
-            lambda row: row['win_ratio'] * 0.6 + (row['total'] / preferences_sum[row['stat']]) * 0.4, axis=1)
+            lambda row: row['win_ratio'] * 0.6 + (row['total'] / preferences_sum[row['stat']] if preferences_sum[row['stat']] != 0 else 0) * 0.4, axis=1)
         self.df['exponential_weight'] = self.df.apply(lambda row: 2.718281828459045 ** row['modified_weight'], axis=1)
 
     def get_total_exponential(self):
@@ -87,7 +89,6 @@ class ExponentialAnalysis(AnalysisBase):
 
         self.df['rating'] = self.df.apply(lambda row: row['normalized_exponential'] * preference_weight[row['stat']],
                                             axis=1)
-
         return self.df
 
     def transform_dataframe(self):
@@ -131,7 +132,7 @@ class BasicAnalysis(AnalysisBase):
     def get_likelihood(self, data: DataFrame):
         likelihood = pd.Series(dtype=float)
         preferences = self.get_preference_weight()
-        print(preferences)
+
         for pref in preferences:
             s = data[pref[0]] * pref[1]
             likelihood = likelihood.add(s, fill_value=0)
