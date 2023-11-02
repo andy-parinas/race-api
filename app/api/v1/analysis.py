@@ -68,7 +68,7 @@ def __analyze_multiple_race(db, race_ids, preferences, preference_type):
         """
         Return only the top 5 results and the race_horses which contains list of race_id and horses in that race
         """
-        return final_df.head(5).to_dict(), race_horses
+        return final_df.head(4).to_dict(), race_horses
 
     return None
 
