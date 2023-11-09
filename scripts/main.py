@@ -166,7 +166,6 @@ if __name__ == "__main__":
 ### WORKING #####
 
     files = sftp_client.get_files_in_dir('/mr_form')
-    # print(files)
 
     db = SessionLocal()
     start_timestamp = get_start_params(db, arguments)
@@ -175,7 +174,6 @@ if __name__ == "__main__":
         filename = file.filename
         if filename.endswith("_A.xml"):
             if file.st_mtime > start_timestamp:
-
                 process_file(
                     db, filename, timestamp=file.st_mtime)
                 # if not file_db_exists:

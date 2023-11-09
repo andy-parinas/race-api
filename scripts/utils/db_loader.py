@@ -196,19 +196,23 @@ def process_horse_race_stats_data(db: Session, stats_data: HorseRaceStatsData, l
 
 
 def upload_horse_colours(s3_client, folder,  colours_data):
-    image_data, filename = image_download(colours_data)
 
-    colours_image = ""
-    if image_data and filename:
-        object_name = f"{folder}/{filename}"
-        uploaded = s3_client.upload_image(
-            image_data, settings.IMAGE_FOLDER, object_name)
-        if uploaded:
-            s3_client.make_object_public(
-                settings.IMAGE_FOLDER, object_name)
-            colours_image = f"{settings.IMAGE_URL}/{object_name}"
+    if colours_data is not None:
+        image_data, filename = image_download(colours_data)
 
-    return colours_image
+        colours_image = ""
+        if image_data and filename:
+            object_name = f"{folder}/{filename}"
+            uploaded = s3_client.upload_image(
+                image_data, settings.IMAGE_FOLDER, object_name)
+            if uploaded:
+                s3_client.make_object_public(
+                    settings.IMAGE_FOLDER, object_name)
+                colours_image = f"{settings.IMAGE_URL}/{object_name}"
+
+        return colours_image
+
+    return ""
 
 
 def convert_date_format(date_string, output_format="%Y-%m-%d"):
