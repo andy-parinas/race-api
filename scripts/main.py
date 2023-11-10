@@ -85,8 +85,8 @@ def process_file(db: Session, filename: str, timestamp: int):
             db, file_in_db.id, timestamp=timestamp)
 
         # upload the file to S3
-        # if not file_in_db.is_uploaded:
-            # upload_processed_file(db, downloaded_file, file_in_db)
+        if not file_in_db.is_uploaded:
+            upload_processed_file(db, downloaded_file, file_in_db)
 
         delete_file_from_local_storage(downloaded_file)
 
