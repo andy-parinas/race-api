@@ -46,6 +46,21 @@ class HorseRaceStatsRepository:
         # return HorseRaceStatSchema.from_orm(stats)
         return [HorseRaceStatSchema.from_orm(stat) for stat in stats]
 
+
+    def get_all_stats_by_id(self, db: Session, race_id: int, horse_id: int):
+        stmt = select(HorseRaceStats).where(HorseRaceStats.race_id == race_id,
+                                            HorseRaceStats.horse_id == horse_id)
+
+        results = db.execute(stmt).unique().all()
+
+        stats_results = []
+        for result in results:
+            stat, = result
+            stat_schema = HorseRaceStatSchema.from_orm(stat)
+            stats_results.append(stat_schema)
+
+        return stats_results
+
     def get_selective_stats(self, db: Session, *,
                             race_ids: List[int] | None = None,
                             horse_ids: List[int] | None = None,
@@ -103,6 +118,8 @@ class HorseRaceStatsRepository:
 
         return HorseRaceStatSchema.from_orm(stats)
 
+
+
     def update_horse_race_stats(self, db: Session, id: int, stats_data: HorseRaceStatsData, last_starts: str):
 
         win_ratio = self.__compute_win_ratio(
@@ -116,6 +133,14 @@ class HorseRaceStatsRepository:
             second=stats_data.second,
             third=stats_data.third,
             win_ratio=win_ratio,
+        )
+
+        db.execute(stmt)
+        db.commit()
+
+    def scratch(self, db: Session, id: int):
+        stmt = update(HorseRaceStats).where(HorseRaceStats.id == id).values(
+            is_scratched = True
         )
 
         db.execute(stmt)

@@ -7,6 +7,7 @@ from app import repositories as repo
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from utils.xml_parser import XmlParser
+from utils.scratch_loader import load_scratch
 
 
 path_root = Path(__file__).parents[1]
@@ -59,7 +60,12 @@ def process_file(db: Session, filename: str, timestamp: int):
     downloaded_file = sftp_client.download_file(
         '/mr_scratchings', filename, f"{str(path_root)}/storage")
 
-    print(downloaded_file)
+    if downloaded_file:
+        print(f"File downloaded successfully: {downloaded_file}")
+
+        load_scratch(downloaded_file)
+
+        delete_file_from_local_storage(downloaded_file)
 
 
 if __name__ == "__main__":

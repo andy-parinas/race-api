@@ -8,10 +8,16 @@ class ScratchParser:
 
         self.soup = BeautifulSoup(xml, features='xml')
 
-    def get_meeting_date(self):
+    def get_meeting_data(self):
         meeting = self.soup.find('meeting', recursive=False)
+        meeting_track = meeting.find('track', recursive=False)
         meeting_date = meeting.find('date', recursive=False)
-        return meeting_date.text
+        return {
+            "track_name": meeting_track['name'],
+            "track_id": meeting_track['id'],
+            "state": meeting_track['state'],
+            "meeting_date": meeting_date.text
+        }
 
     def get_races(self):
         race_data = self.soup.races
