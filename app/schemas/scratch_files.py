@@ -7,6 +7,9 @@ class ScratchFileBase(BaseModel):
     timestamp: int
 
 
+class ScratchFileCreate(ScratchFileBase):
+    ...
+
 class ScratchFileInDb(ScratchFileBase):
     id: int
 
@@ -16,4 +19,6 @@ class ScratchFileInDb(ScratchFileBase):
 
 class ScratchFile(ScratchFileInDb):
     ...
+
+
 
