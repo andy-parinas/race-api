@@ -49,7 +49,7 @@ class HorseRaceStatsRepository:
 
     def get_all_stats_by_id(self, db: Session, race_id: int, horse_id: int):
         stmt = select(HorseRaceStats).where(HorseRaceStats.race_id == race_id,
-                                            HorseRaceStats.horse_id == horse_id)
+                                            HorseRaceStats.horse_id == horse_id, )
 
         results = db.execute(stmt).unique().all()
 
@@ -66,7 +66,8 @@ class HorseRaceStatsRepository:
                             horse_ids: List[int] | None = None,
                             stats: List[str] | None = None) -> List[HorseRaceStatSchema]:
 
-        stmt = select(HorseRaceStats)
+        print("Here\n")
+        stmt = select(HorseRaceStats).where(HorseRaceStats.is_scratched == False)
 
         if race_ids:
             stmt = stmt.where(HorseRaceStats.race_id.in_(race_ids))

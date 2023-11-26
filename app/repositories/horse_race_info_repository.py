@@ -53,8 +53,8 @@ class HorseRaceInfoRepository:
         return db.query(HorseRaceInfo).filter(HorseRaceInfo.id == info_id).first()
 
     def get_horse_race_info(self, db: Session, *, race_id: int, horse_id: int):
-        stmt = select(HorseRaceInfo).where(HorseRaceInfo.race_id ==
-                                           race_id, HorseRaceInfo.horse_id == horse_id)
+        stmt = select(HorseRaceInfo).where(HorseRaceInfo.race_id == race_id, HorseRaceInfo.horse_id == horse_id,
+                                           HorseRaceInfo.is_scratched == False)
 
         info = db.scalars(stmt).first()
 
@@ -96,5 +96,12 @@ class HorseRaceInfoRepository:
         db.execute(stmt)
         db.commit()
 
+    def scratch(self, db: Session, id: int):
+        stmt = update(HorseRaceInfo).where(HorseRaceInfo.id == id).values(
+            is_scratched=True
+        )
+
+        db.execute(stmt)
+        db.commit()
 
 horse_race_info = HorseRaceInfoRepository()

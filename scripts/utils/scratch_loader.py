@@ -31,6 +31,11 @@ def load_scratch(file):
                                                                               horse_id=horse_in_db.id)
                             for stat in stats:
                                 repo.horse_race_stats.scratch(db, stat.id)
-                                print(f"Scratched {stat.id}")
+                                print(f"Scratched HorseRaceStat {stat.id}")
 
+                            horse_race_info = repo.horse_race_info.get_horse_race_info(db,
+                                               race_id=race_in_db.id, horse_id=horse_in_db.id)
+                            if horse_race_info is not None:
+                                repo.horse_race_info.scratch(db, horse_race_info.id)
+                                print(f"Scratched HorseRaceStat {horse_race_info.id}")
 

@@ -8,7 +8,7 @@ from app.models.meeting import Meeting
 from app.models.track import Track
 from app.models.horse import Horse
 from app.models.horse_race_info import HorseRaceInfo
-# from app.models.horse_race_stats import HorseRaceStats
+from app.models.horse_race_stats import HorseRaceStats
 from app.schemas.race import RaceCreate, RaceData, Race as RaceSchema, RaceWithMeeting, RaceListResults, HorseRaceInfoAndStats, HorseRaceInfoAndStatsList, HorseWithStatsAndInfo, RaceDetailsWithHorseStats
 # from app.schemas.horse_race_info import HorseRaceInfo as HorseRaceInfoSchema
 
@@ -92,11 +92,14 @@ class RaceRepository:
         stmt = (
             select(Race)
             .options(
-                joinedload(Race.horses).joinedload(Horse.stats)
+                joinedload(Race.horses).lazyload(Horse.stats.and_(HorseRaceStats.is_scratched == False))
             )
-            .options(joinedload(Race.horses).joinedload(Horse.infos))
+            .options(joinedload(Race.horses).lazyload(Horse.infos.and_(HorseRaceInfo.is_scratched == False)))
             .where(Race.id == id)
         )
+
+
+
 
         # results = db.execute(stmt).unique().first()
         race = db.scalars(stmt).first()
