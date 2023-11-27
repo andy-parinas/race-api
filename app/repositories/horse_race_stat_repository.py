@@ -14,7 +14,7 @@ class HorseRaceStatsRepository:
 
     def create(self, db: Session, data_in: HorseRaceStatsCreate, last_starts: str) -> HorseRaceStats:
 
-        data_in.win_ratio = self.__compute_win_ratio(
+        data_in.win_ratio = self.__compute_win_ratio_2(
             total=data_in.total, first=data_in.first,
             second=data_in.second, third=data_in.third, stats=data_in.stat, last_starts=last_starts)
 
@@ -123,7 +123,7 @@ class HorseRaceStatsRepository:
 
     def update_horse_race_stats(self, db: Session, id: int, stats_data: HorseRaceStatsData, last_starts: str):
 
-        win_ratio = self.__compute_win_ratio(
+        win_ratio = self.__compute_win_ratio_2(
             total=stats_data.total, first=stats_data.first,
             second=stats_data.second, third=stats_data.third, stats=stats_data.stat, last_starts=last_starts)
 
@@ -160,6 +160,22 @@ class HorseRaceStatsRepository:
                     return 0
 
             win_ratio = (first + second * 0.5 + third * 0.25) / total
+
+        return win_ratio
+
+    def __compute_win_ratio_2(self, *, total, first, second, third, stats: str, last_starts: str):
+        win_ratio = 0
+
+        if total > 0:
+            if stats == "first_up":
+                if not self.__with_first_up(last_starts):
+                    return 0
+
+            if stats == "second_up":
+                if not self.__with_second_up(last_starts):
+                    return 0
+
+            win_ratio = (first * 3 + second * 2 + third * 1) / total
 
         return win_ratio
 

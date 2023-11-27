@@ -85,8 +85,8 @@ def process_file(db: Session, filename: str, timestamp: int):
             db, file_in_db.id, timestamp=timestamp)
 
         # upload the file to S3
-        # if not file_in_db.is_uploaded:
-        #     upload_processed_file(db, downloaded_file, file_in_db)
+        if not file_in_db.is_uploaded:
+            upload_processed_file(db, downloaded_file, file_in_db)
 
         delete_file_from_local_storage(downloaded_file)
 
@@ -130,6 +130,7 @@ def get_start_params(db: Session, arguments: List[str]):
 
     latest_file = repo.form_files.get_latest_form_file(db)
 
+
     if 'start' in params:
         if params['start'] == 'today':
             now = datetime.now()
@@ -169,6 +170,7 @@ if __name__ == "__main__":
 
     db = SessionLocal()
     start_timestamp = get_start_params(db, arguments)
+
 
     for file in files:
         filename = file.filename
