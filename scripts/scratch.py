@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     db = SessionLocal()
     start_timestamp = get_start_params(db, arguments)
-
+    print(start_timestamp)
     if start_timestamp is not None:
         for file in files:
             filename = file.filename
