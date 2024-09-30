@@ -40,6 +40,7 @@ class Settings:
 
     IMAGE_FOLDER = os.getenv("IMAGE_FOLDER")
     FORM_FOLDER = os.getenv("FORM_FOLDER")
+    SCRATCH_FOLDER = os.getenv("SCRATCH_FOLDER")
 
     IMAGE_URL = os.getenv("IMAGE_URL")
 

@@ -130,6 +130,7 @@ def get_start_params(db: Session, arguments: List[str]):
 
     latest_file = repo.form_files.get_latest_form_file(db)
 
+
     if 'start' in params:
         if params['start'] == 'today':
             now = datetime.now()
@@ -166,16 +167,15 @@ if __name__ == "__main__":
 ### WORKING #####
 
     files = sftp_client.get_files_in_dir('/mr_form')
-    # print(files)
 
     db = SessionLocal()
     start_timestamp = get_start_params(db, arguments)
+
 
     for file in files:
         filename = file.filename
         if filename.endswith("_A.xml"):
             if file.st_mtime > start_timestamp:
-
                 process_file(
                     db, filename, timestamp=file.st_mtime)
                 # if not file_db_exists:

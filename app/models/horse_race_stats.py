@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, String, ForeignKey, Integer, Float, DateTime
+from sqlalchemy import Column, String, ForeignKey, Integer, Float, DateTime, Boolean
 from sqlalchemy.orm import relationship, mapped_column
 
 
@@ -25,6 +25,7 @@ class HorseRaceStats(Base):
     win_ratio = mapped_column(Float, default=0)
     # race = relationship("Race", back_populates="stats")
     horse = relationship("Horse", back_populates="stats")
+    is_scratched = mapped_column(Boolean, default=False)
     created_at = mapped_column(
         DateTime, default=datetime.now)
     updated_at = mapped_column(

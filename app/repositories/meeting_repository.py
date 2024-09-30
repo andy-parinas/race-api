@@ -49,7 +49,7 @@ class MeetingRepository:
             Meeting.track.id == track_id, Meeting.date == date)
         return query.first()
 
-    def get_meeting(self, db: Session, track_id, date: str):
+    def get_meeting(self, db: Session, track_id, date: str) -> Optional[MeetingSchema]:
         stmt = select(Meeting).where(Meeting.track_id ==
                                      track_id).where(Meeting.date == date)
 

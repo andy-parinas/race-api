@@ -8,7 +8,7 @@ from app import repositories as repo
 from app.schemas.analysis import AnalsyisInput
 from app.schemas.horse import HorseListResult
 from app.db.session import get_db
-from app.services.analysis_service import BasicAnalysis, Preference, BayseAnalysis
+from app.services.analysis_service import BasicAnalysis, Preference, BayseAnalysis, ExponentialAnalysis
 
 router = APIRouter()
 
@@ -19,8 +19,12 @@ def analyse_race_advance(analysis_in: AnalsyisInput,  db: Session = Depends(get_
     preferences = analysis_in.preferences
     # preferences.append("all")
 
-    results, race_horses = __analyze_multiple_race(
-        db, analysis_in.race_ids, preferences, analysis_in.preference_type)
+    multi_race_analysis = __analyze_multiple_race( db, analysis_in.race_ids, preferences, analysis_in.preference_type)
+
+    if multi_race_analysis is None:
+        return []
+
+    results, race_horses = multi_race_analysis
 
     results = __get_analysis_results_values(db, results, race_horses)
 
@@ -33,36 +37,40 @@ def __analyze_multiple_race(db, race_ids, preferences, preference_type):
     race_horses = []
 
     for race_id in race_ids:
-        single_race_result, horse_ids = __analyze_single_race(
-            db, race_id, preferences, preference_type)
+        single_race_analysis = __analyze_single_race(db, race_id, preferences, preference_type)
 
-        race_horses.append(horse_ids)
 
-        if not single_race_result:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="No results found. Statistics does not have enough information.")
+        if single_race_analysis is not None:
 
-        """
-        Convert the analysis_result into a dataframe. 
-        """
-        analysis_df = DataFrame.from_dict(
-            single_race_result, orient='index', columns=['rating'])
-        analysis_df.index.name = 'horse_id'
+            single_race_result, horse_ids = single_race_analysis
 
-        """
-        For multiple races, gather all the analysis_result into the final_df
-        """
-        final_df = concat([final_df, analysis_df], ignore_index=False)
 
-    """
-    Sort the values from highes to lowest rating
-    """
-    final_df = final_df.sort_values(['rating'], ascending=[False])
+            race_horses.append(horse_ids)
+
+            if single_race_result:
+                """
+                Convert the analysis_result into a dataframe. 
+                """
+                analysis_df = DataFrame.from_dict( single_race_result, orient='index', columns=['rating'])
+                analysis_df.index.name = 'horse_id'
+
+                """
+                For multiple races, gather all the analysis_result into the final_df
+                """
+                final_df = concat([final_df, analysis_df], ignore_index=False)
 
     """
-    Return only the top 5 results and the race_horses which contains list of race_id and horses in that race
+    Sort the values from highest to lowest rating
     """
-    return final_df.head(5).to_dict(), race_horses
+    if len(final_df) > 0:
+        final_df = final_df.sort_values(['rating'], ascending=[False])
+
+        """
+        Return only the top 5 results and the race_horses which contains list of race_id and horses in that race
+        """
+        return final_df.head(4).to_dict(), race_horses
+
+    return None
 
 
 """
@@ -100,6 +108,7 @@ def __analyze_single_race(db, race_id, preferences, preference_type):
 
 
     if not race_query_results or len(race_query_results) == 0:
+        print("No Results. Single race analysis")
         return None
 
     stat_df = __convert_stat_to_df(race_query_results)
@@ -125,11 +134,20 @@ def __get_basic_result(df: DataFrame, selected_preferences: List[str], preferenc
     basic = BasicAnalysis(df=df, prefrerences=stat_preferences,
                           preference_type=preference_type)
 
-    data = basic.transform_dataframe()
+    exponential = ExponentialAnalysis(df=df, prefrerences=stat_preferences,
+                          preference_type=preference_type)
 
-    likelihood = basic.get_likelihood(data)
+    # print(exponential.transform_dataframe())
 
-    return basic.get_probability(likelihood=likelihood)
+    print(exponential.get_final_rating())
+
+    # data = basic.transform_dataframe()
+    #
+    # likelihood = basic.get_likelihood(data)
+    #
+    # return basic.get_probability(likelihood=likelihood)
+
+    return exponential.get_final_rating()
 
 
 def __get_bayes_results(df: DataFrame, selected_preferences: List[str], preference_type):

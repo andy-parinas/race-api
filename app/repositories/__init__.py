@@ -6,3 +6,4 @@ from .horse_race_stat_repository import horse_race_stats
 from .horse_race_info_repository import horse_race_info
 from .form_files_repository import form_files
 from .track_repository import track
+from .scratch_files_repository import scratch_files

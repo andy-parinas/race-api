@@ -72,7 +72,7 @@ class XmlParser:
     def get_horse_colours_image(self, horse: Tag):
         colours_data = horse.find('horse_colours_image', recursive=False)
         if colours_data is None:
-            return ""
+            return None
         return colours_data.text
 
     def get_horse_barrier(self, horse: Tag):

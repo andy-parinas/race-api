@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, String, ForeignKey, Integer, DateTime
+from sqlalchemy import Column, String, ForeignKey, Integer, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from .base_class import Base
@@ -24,6 +24,7 @@ class HorseRaceInfo(Base):
         back_populates="infos", overlaps="horses,races")
     horse = relationship("Horse", back_populates="infos",
                          overlaps="horses,races")
+    is_scratched = mapped_column(Boolean, default=False)
     created_at = mapped_column(
         DateTime, default=datetime.now)
     updated_at = mapped_column(
